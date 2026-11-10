@@ -1,0 +1,48 @@
+// Expected loads and stores on the bus, in order (normal loads aren't checked).
+write addr=20000400 (normal) size=4 data=11111111
+write addr=20000404 (normal) size=4 data=22222222
+write addr=20000408 (normal) size=4 data=33333333
+write addr=2000040c (normal) size=4 data=44444444
+write addr=20000410 (normal) size=1 data=11
+write addr=20000411 (normal) size=1 data=22
+write addr=20000412 (normal) size=2 data=3333
+write addr=20000414 (normal) size=4 data=44444444
+write addr=20000414 (normal) size=2 data=a5a5
+write addr=20000417 (normal) size=1 data=22
+write addr=20000418 (normal) size=4 data=5a5aa5a5
+read  addr=20000418 (normal) size=4
+write addr=2000041c (normal) size=4 data=5a5aa5a5
+read  addr=2000041c (normal) size=4
+write addr=20000000 (normal) size=4 data=5a5aa5a5
+read  addr=20000400 (normal) size=4
+read  addr=20000404 (normal) size=4
+read  addr=20000410 (normal) size=4
+write addr=20000420 (normal) size=4 data=11111111
+write addr=20000424 (normal) size=4 data=22222222
+write addr=20000428 (normal) size=4 data=33332211
+write addr=40001000 (device) size=4 data=0000002b
+write addr=2000042c (normal) size=4 data=5a5aa5a5
+write addr=40001000 (device) size=4 data=00000014
+read  addr=40001000 (device) size=4
+write addr=20000430 (normal) size=4 data=00000014
+read  addr=2000042c (normal) size=4
+write addr=40001000 (device) size=4 data=5a5aa5a5
+read  addr=40001000 (device) size=4
+write addr=20000004 (normal) size=4 data=00000025
+write addr=20000440 (normal) size=4 data=00000008
+write addr=20000444 (normal) size=1 data=08
+write addr=20000448 (normal) size=4 data=00000007
+write addr=2000044c (normal) size=1 data=07
+write addr=20000450 (normal) size=4 data=00000006
+write addr=20000454 (normal) size=1 data=06
+write addr=20000458 (normal) size=4 data=00000005
+write addr=2000045c (normal) size=1 data=05
+write addr=20000460 (normal) size=4 data=00000004
+write addr=20000464 (normal) size=1 data=04
+write addr=20000468 (normal) size=4 data=00000003
+write addr=2000046c (normal) size=1 data=03
+write addr=20000470 (normal) size=4 data=00000002
+write addr=20000474 (normal) size=1 data=02
+write addr=20000478 (normal) size=4 data=00000001
+write addr=2000047c (normal) size=1 data=01
+write addr=40001000 (device) size=4 data=00000000

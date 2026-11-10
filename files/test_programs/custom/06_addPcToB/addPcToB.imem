@@ -1,0 +1,17 @@
+// ADD PC lands on a B (last week's prediction bug, from the lecture slide):
+// the B must still be taken, though nothing predicted it on the way in.
+// Each udf (a halt) is somewhere that must never run.
+//
+// When it halts, DMEM holds 0x0000002a at 0x20000000.
+@00000000
+00 22        // movs  r2, #0
+97 44        // add   pc, r2          @ PC reads as 0x06: jump to the B
+00 DE        // udf   #0              @ 0x04: skipped
+00 E0        // b     good            @ 0x06
+00 DE        // udf   #0              @ 0x08: must never run
+// good:
+20 20        // movs  r0, #32
+00 06        // lsls  r0, r0, #24     @ r0 = 0x20000000
+2A 21        // movs  r1, #42
+01 60        // str   r1, [r0, #0]
+00 DE        // udf   #0

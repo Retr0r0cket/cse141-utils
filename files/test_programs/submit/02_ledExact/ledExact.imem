@@ -1,0 +1,321 @@
+// Turn LED 5 on with COUNT exactly 1000, on any core
+//
+// Approach: measure this core, then do it, always with the same code. A run of
+// the timed code clears the counter (COUNT is 0 from the cycle after), goes N
+// times round a loop, jumps into a sled of harmless APB writes at entry m and a
+// sled of NOPs at entry j, and ends with the timed store, then a load of COUNT.
+// Only registers change between runs: the timed store writes 0 to the LEDs
+// while measuring, and 32 (LED 5) for real.
+//
+// T: with the timed store aimed at CLEAR, COUNT at the end is V; so a run that
+// ends with COUNT = T = 1001 + V had its timed store at COUNT 1000. S(N, j, m)
+// is COUNT at the end; each measurement is the second of two identical runs.
+// P = (S(8, 0, 0) - S(4, 0, 0)) / 4 is the loop's period, and C8 what 8 NOP
+// entries cost. For each m, the NOP entries are scanned by arithmetic (entry j
+// takes about C8 * j / 8 off S(4, 0, m)), and those that should leave T - S(4, j, m)
+// a multiple of P are measured: if it is, N = 4 + that / P. Then the
+// run is repeated with the same code between runs, and the run after two that
+// both ended at exactly T writes LED 5. The pad writes give a step other than
+// a NOP's, for a core where every NOP-and-loop time has the same parity.
+//
+// Assumes only that a store to CLEAR takes as long as one to the LEDs (both APB
+// writes behind the same bridge), and a loop period of at most about 32 NOPs.
+@00000000
+40 27        // movs r7, #0x40
+3F 03        // lsls r7, r7, #12
+02 37        // adds r7, #2
+3F 03        // lsls r7, r7, #12  -> r7 = 0x40002000 (COUNT; CLEAR at +4)
+00 25        // movs r5, #0       -> the timed store's data
+00 20        // movs r0, #0
+81 46        // mov r9, r0       -> r9: NOP sled entry (2j)
+00 20        // movs r0, #0
+82 46        // mov r10, r0       -> r10: pad sled entry (2m)
+04 20        // movs r0, #4
+80 46        // mov r8, r0       -> r8: N = 4
+3E 1D        // adds r6, r7, #4   -> r6 = CLEAR
+41 46        // mov r1, r8       -> V: once to warm up
+00 F0 F1 F8  // bl copy
+41 46        // mov r1, r8       -> and again, measured
+00 F0 EE F8  // bl copy
+FA 23        // movs r3, #250
+9B 00        // lsls r3, r3, #2  -> 1000
+01 33        // adds r3, #1
+1B 18        // adds r3, r3, r0   -> T = 1001 + V: COUNT at the end when the timed store's is 1000
+9B 46        // mov r11, r3       -> r11: T
+40 26        // movs r6, #0x40
+36 03        // lsls r6, r6, #12
+01 36        // adds r6, #1
+36 03        // lsls r6, r6, #12  -> r6 = 0x40001000 (LEDs)
+41 46        // mov r1, r8       -> S(4, 0, 0): once to warm up
+00 F0 E2 F8  // bl copy
+41 46        // mov r1, r8       -> and again, measured
+00 F0 DF F8  // bl copy
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+18 60        // str r0, [r3, #0]  -> s40
+08 20        // movs r0, #8
+80 46        // mov r8, r0       -> N = 8
+41 46        // mov r1, r8       -> S(8, 0, 0): once to warm up
+00 F0 D7 F8  // bl copy
+41 46        // mov r1, r8       -> and again, measured
+00 F0 D4 F8  // bl copy
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+1A 68        // ldr r2, [r3, #0]  -> s40
+80 1A        // subs r0, r0, r2   -> 4 P
+80 08        // lsrs r0, r0, #2   -> P
+00 D1        // bne have_p
+00 DE        // udf #0           -> P = 0: nothing to measure with
+// have_p:
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+58 60        // str r0, [r3, #4]  -> p
+04 20        // movs r0, #4
+80 46        // mov r8, r0       -> N = 4
+10 20        // movs r0, #16
+81 46        // mov r9, r0       -> entry 8
+41 46        // mov r1, r8       -> S(4, 8, 0): once to warm up
+00 F0 C3 F8  // bl copy
+41 46        // mov r1, r8       -> and again, measured
+00 F0 C0 F8  // bl copy
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+1A 68        // ldr r2, [r3, #0]  -> s40
+10 1A        // subs r0, r2, r0   -> C8: entry 8 skips 8 NOPs
+04 28        // cmp r0, #4
+00 DA        // bge have_c8
+08 20        // movs r0, #8       -> (not a sensible cost: take a cycle a NOP)
+// have_c8:
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+98 60        // str r0, [r3, #8]  -> c8
+00 20        // movs r0, #0
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+D8 60        // str r0, [r3, #12]  -> m
+// try_m:
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+D8 68        // ldr r0, [r3, #12]  -> m
+82 46        // mov r10, r0
+00 25        // movs r5, #0
+04 20        // movs r0, #4
+80 46        // mov r8, r0       -> N = 4
+00 20        // movs r0, #0
+81 46        // mov r9, r0       -> entry 0
+41 46        // mov r1, r8       -> S(4, 0, m): once to warm up
+00 F0 A6 F8  // bl copy
+41 46        // mov r1, r8       -> and again, measured
+00 F0 A3 F8  // bl copy
+04 46        // mov r4, r0       -> S(4, 0, m)
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+98 68        // ldr r0, [r3, #8]  -> c8
+80 46        // mov r8, r0       -> r8: C8, while scanning
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+5A 68        // ldr r2, [r3, #4]  -> p
+5B 46        // mov r3, r11
+1B 1B        // subs r3, r3, r4   -> T - S(4, 0, m)
+00 D5        // bpl t_above
+00 23        // movs r3, #0
+// t_above:
+50 02        // lsls r0, r2, #9
+01 24        // movs r4, #1
+64 02        // lsls r4, r4, #9
+00 21        // movs r1, #0
+// divide_r:
+83 42        // cmp r3, r0
+01 D3        // bcc smaller_r
+1B 1A        // subs r3, r3, r0
+09 19        // adds r1, r1, r4
+// smaller_r:
+40 08        // lsrs r0, r0, #1
+64 08        // lsrs r4, r4, #1
+F8 D1        // bne divide_r
+04 24        // movs r4, #4       -> r4: C8 * j + 4 (rounding), r12: C8 * j / 8, r1: j, r3: residue
+00 21        // movs r1, #0
+8C 46        // mov r12, r1
+// scan:
+00 2B        // cmp r3, #0
+0D D0        // beq candidate
+// advance:
+01 31        // adds r1, #1       -> j + 1
+20 29        // cmp r1, #32
+6B D2        // bcs next_m
+40 46        // mov r0, r8
+24 18        // adds r4, r4, r0
+E0 08        // lsrs r0, r4, #3   -> C8 * j / 8
+65 46        // mov r5, r12
+45 1B        // subs r5, r0, r5   -> what this entry takes off
+84 46        // mov r12, r0
+5B 19        // adds r3, r3, r5
+// modp:
+93 42        // cmp r3, r2
+F1 D3        // bcc scan
+9B 1A        // subs r3, r3, r2
+FB E7        // b modp
+// candidate:
+18 1C        // adds r0, r3, #0
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+58 61        // str r0, [r3, #20]  -> res
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+19 61        // str r1, [r3, #16]  -> j
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+DC 61        // str r4, [r3, #28]  -> acc
+60 46        // mov r0, r12
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+18 62        // str r0, [r3, #32]  -> d
+49 18        // adds r1, r1, r1   -> 2j
+89 46        // mov r9, r1
+00 25        // movs r5, #0
+04 20        // movs r0, #4
+80 46        // mov r8, r0       -> N = 4
+41 46        // mov r1, r8       -> S(4, j, m): once to warm up
+00 F0 63 F8  // bl copy
+41 46        // mov r1, r8       -> and again, measured
+00 F0 60 F8  // bl copy
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+5A 68        // ldr r2, [r3, #4]  -> p
+5B 46        // mov r3, r11
+1B 1A        // subs r3, r3, r0   -> T - S(4, j, m)
+2B D4        // bmi resume
+50 02        // lsls r0, r2, #9
+01 24        // movs r4, #1
+64 02        // lsls r4, r4, #9
+00 21        // movs r1, #0
+// divide_n:
+83 42        // cmp r3, r0
+01 D3        // bcc smaller_n
+1B 1A        // subs r3, r3, r0
+09 19        // adds r1, r1, r4
+// smaller_n:
+40 08        // lsrs r0, r0, #1
+64 08        // lsrs r4, r4, #1
+F8 D1        // bne divide_n
+00 2B        // cmp r3, #0
+1E D1        // bne resume        -> not a whole number of loop periods after all
+04 31        // adds r1, #4       -> N = 4 + (T - S(4, j, m)) / P
+88 46        // mov r8, r1
+04 20        // movs r0, #4       -> at most 4 runs
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+98 61        // str r0, [r3, #24]  -> rep
+00 25        // movs r5, #0
+AC 46        // mov r12, r5       -> r12: the run before's COUNT at the end
+// rep:
+41 46        // mov r1, r8
+00 F0 42 F8  // bl copy
+20 2D        // cmp r5, #32
+2F D0        // beq done         -> that run wrote LED 5
+5B 46        // mov r3, r11
+C4 1A        // subs r4, r0, r3   -> this run - T
+62 46        // mov r2, r12
+D2 1A        // subs r2, r2, r3   -> the run before - T
+14 43        // orrs r4, r2  -> 0 only if both were exactly T
+64 42        // rsbs r4, r4, #0   -> C set only if so
+00 25        // movs r5, #0
+6D 41        // adcs r5, r5  -> C
+6D 01        // lsls r5, r5, #5   -> 32 (LED 5) or 0: no branch, so the time between runs is always the same
+84 46        // mov r12, r0
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+9A 69        // ldr r2, [r3, #24]  -> rep
+01 3A        // subs r2, #1
+9A 61        // str r2, [r3, #24]
+EA D1        // bne rep
+00 25        // movs r5, #0       -> never steady at T: keep looking
+FF E7        // b resume
+// resume:
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+98 68        // ldr r0, [r3, #8]  -> c8
+80 46        // mov r8, r0
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+18 6A        // ldr r0, [r3, #32]  -> d
+84 46        // mov r12, r0
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+19 69        // ldr r1, [r3, #16]  -> j
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+DC 69        // ldr r4, [r3, #28]  -> acc
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+5A 68        // ldr r2, [r3, #4]  -> p
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+58 69        // ldr r0, [r3, #20]  -> res
+03 1C        // adds r3, r0, #0
+90 E7        // b advance
+// next_m:
+20 23        // movs r3, #0x20
+1B 06        // lsls r3, r3, #24  -> SRAM
+D8 68        // ldr r0, [r3, #12]  -> m
+02 30        // adds r0, #2       -> next pad entry
+D8 60        // str r0, [r3, #12]
+08 28        // cmp r0, #8
+00 D2        // bcs give_up
+5D E7        // b try_m
+// give_up:
+// done:
+00 DE        // udf #0           -> halt
+@00000200
+// copy:
+78 60        // str r0, [r7, #4]  -> CLEAR: COUNT is 0 from the next cycle
+// loop:
+01 39        // subs r1, #1
+FD D1        // bne loop         -> N times
+D7 44        // add pc, r10      -> into the pad sled, at entry m
+00 BF        // nop              (never runs)
+BD 60        // str r5, [r7, #8]  pad 0: an APB write to nothing (COUNT + 8)
+BD 60        // str r5, [r7, #8]  pad 1: an APB write to nothing (COUNT + 8)
+BD 60        // str r5, [r7, #8]  pad 2: an APB write to nothing (COUNT + 8)
+BD 60        // str r5, [r7, #8]  pad 3: an APB write to nothing (COUNT + 8)
+CF 44        // add pc, r9       -> into the NOP sled, at entry j
+00 BF        // nop              (never runs)
+00 BF        // nop              sled 0
+00 BF        // nop              sled 1
+00 BF        // nop              sled 2
+00 BF        // nop              sled 3
+00 BF        // nop              sled 4
+00 BF        // nop              sled 5
+00 BF        // nop              sled 6
+00 BF        // nop              sled 7
+00 BF        // nop              sled 8
+00 BF        // nop              sled 9
+00 BF        // nop              sled 10
+00 BF        // nop              sled 11
+00 BF        // nop              sled 12
+00 BF        // nop              sled 13
+00 BF        // nop              sled 14
+00 BF        // nop              sled 15
+00 BF        // nop              sled 16
+00 BF        // nop              sled 17
+00 BF        // nop              sled 18
+00 BF        // nop              sled 19
+00 BF        // nop              sled 20
+00 BF        // nop              sled 21
+00 BF        // nop              sled 22
+00 BF        // nop              sled 23
+00 BF        // nop              sled 24
+00 BF        // nop              sled 25
+00 BF        // nop              sled 26
+00 BF        // nop              sled 27
+00 BF        // nop              sled 28
+00 BF        // nop              sled 29
+00 BF        // nop              sled 30
+00 BF        // nop              sled 31
+35 60        // str r5, [r6, #0]  -> the timed store: r5 to the LEDs (or CLEAR)
+00 BF        // nop
+00 BF        // nop
+00 BF        // nop
+00 BF        // nop
+38 68        // ldr r0, [r7, #0]  -> COUNT
+70 47        // bx lr

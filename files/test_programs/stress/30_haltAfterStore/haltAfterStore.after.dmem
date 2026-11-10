@@ -1,0 +1,5 @@
+// Expected DMEM contents after the program halts: every byte written.
+@00000000 78
+@00000001 56
+@00000002 34
+@00000003 12

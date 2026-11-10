@@ -1,0 +1,15 @@
+// A BL to a function before it (a negative offset), then BX LR back.
+// func adds 5 to r4; r4 is stored to 0x20000000, so memory gets 5.
+
+@00000000
+20 20        // movs  r0, #32
+00 06        // lsls  r0, r0, #24
+00 24        // movs  r4, #0
+01 E0        // b.n   c <main>
+// func:
+05 34        // adds  r4, #5
+70 47        // bx    lr
+// main:
+FF F7 FC FF  // bl    8 <func>
+04 60        // str   r4, [r0, #0]
+00 DE        // udf   #0

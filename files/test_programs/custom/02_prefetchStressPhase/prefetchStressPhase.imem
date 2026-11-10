@@ -1,0 +1,96 @@
+// Prefetch stress, other phase: like 01_prefetchStress (a load or store on every
+// other instruction, 40 in a row), but one instruction later, so the loads and
+// stores fall on the other half of each fetched word.
+
+@00000000
+01 20        // movs  r0, #1
+2A 21        // movs  r1, #42
+00 BF        // nop
+00 BF        // nop
+00 BF        // nop
+40 07        // lsls  r0, r0, #29
+00 BF        // nop
+00 BF        // nop
+00 BF        // nop
+00 BF        // nop
+01 60        // str   r1, [r0, #0]
+00 22        // movs  r2, #0
+41 60        // str   r1, [r0, #4]
+01 22        // movs  r2, #1
+81 60        // str   r1, [r0, #8]
+02 22        // movs  r2, #2
+C1 60        // str   r1, [r0, #12]
+03 22        // movs  r2, #3
+01 61        // str   r1, [r0, #16]
+04 22        // movs  r2, #4
+41 61        // str   r1, [r0, #20]
+05 22        // movs  r2, #5
+81 61        // str   r1, [r0, #24]
+06 22        // movs  r2, #6
+C1 61        // str   r1, [r0, #28]
+07 22        // movs  r2, #7
+01 62        // str   r1, [r0, #32]
+08 22        // movs  r2, #8
+41 62        // str   r1, [r0, #36]
+09 22        // movs  r2, #9
+81 62        // str   r1, [r0, #40]
+0A 22        // movs  r2, #10
+C1 62        // str   r1, [r0, #44]
+0B 22        // movs  r2, #11
+01 63        // str   r1, [r0, #48]
+0C 22        // movs  r2, #12
+41 63        // str   r1, [r0, #52]
+0D 22        // movs  r2, #13
+81 63        // str   r1, [r0, #56]
+0E 22        // movs  r2, #14
+C1 63        // str   r1, [r0, #60]
+0F 22        // movs  r2, #15
+01 64        // str   r1, [r0, #64]
+10 22        // movs  r2, #16
+41 64        // str   r1, [r0, #68]
+11 22        // movs  r2, #17
+81 64        // str   r1, [r0, #72]
+12 22        // movs  r2, #18
+C1 64        // str   r1, [r0, #76]
+13 22        // movs  r2, #19
+01 65        // str   r1, [r0, #80]
+14 22        // movs  r2, #20
+41 65        // str   r1, [r0, #84]
+15 22        // movs  r2, #21
+81 65        // str   r1, [r0, #88]
+16 22        // movs  r2, #22
+C1 65        // str   r1, [r0, #92]
+17 22        // movs  r2, #23
+01 66        // str   r1, [r0, #96]
+18 22        // movs  r2, #24
+41 66        // str   r1, [r0, #100]
+19 22        // movs  r2, #25
+81 66        // str   r1, [r0, #104]
+1A 22        // movs  r2, #26
+C1 66        // str   r1, [r0, #108]
+1B 22        // movs  r2, #27
+01 67        // str   r1, [r0, #112]
+1C 22        // movs  r2, #28
+41 67        // str   r1, [r0, #116]
+1D 22        // movs  r2, #29
+81 67        // str   r1, [r0, #120]
+1E 22        // movs  r2, #30
+C1 67        // str   r1, [r0, #124]
+1F 22        // movs  r2, #31
+03 68        // ldr   r3, [r0, #0]
+00 BF        // nop
+43 68        // ldr   r3, [r0, #4]
+00 BF        // nop
+83 68        // ldr   r3, [r0, #8]
+00 BF        // nop
+C3 68        // ldr   r3, [r0, #12]
+00 BF        // nop
+03 69        // ldr   r3, [r0, #16]
+00 BF        // nop
+43 69        // ldr   r3, [r0, #20]
+00 BF        // nop
+83 69        // ldr   r3, [r0, #24]
+00 BF        // nop
+C3 69        // ldr   r3, [r0, #28]
+00 BF        // nop
+00 DE        // udf   #0 (halt)

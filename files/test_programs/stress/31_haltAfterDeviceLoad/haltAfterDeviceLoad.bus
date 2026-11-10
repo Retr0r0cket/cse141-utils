@@ -1,0 +1,3 @@
+// Expected loads and stores on the bus, in order (normal loads aren't checked).
+write addr=40001000 (device) size=4 data=0000002a
+read  addr=40001000 (device) size=4

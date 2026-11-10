@@ -1,0 +1,4 @@
+// When the LEDs must first turn on: the first write to the LED register
+// with any of bits 5:0 set must see COUNT (in that write's access cycle)
+// from 1000 to 1020, inclusive. See the website.
+1000 1020

@@ -1,0 +1,219 @@
+// Expected loads and stores on the bus, in order (normal loads aren't checked).
+write addr=40001000 (device) size=4 data=00000000
+read  addr=40001000 (device) size=4
+write addr=20000000 (normal) size=4 data=00000000
+write addr=40001000 (device) size=4 data=9e377981
+read  addr=40001000 (device) size=4
+write addr=20000004 (normal) size=4 data=00000001
+write addr=40001000 (device) size=4 data=3c6ef342
+read  addr=40001000 (device) size=4
+write addr=20000008 (normal) size=4 data=00000002
+write addr=40001000 (device) size=4 data=daa66d03
+read  addr=40001000 (device) size=4
+write addr=2000000c (normal) size=4 data=00000003
+write addr=40001000 (device) size=4 data=78dde6c4
+read  addr=40001000 (device) size=4
+write addr=20000010 (normal) size=4 data=00000004
+write addr=40001000 (device) size=4 data=17156045
+read  addr=40001000 (device) size=4
+write addr=20000014 (normal) size=4 data=00000005
+write addr=40001000 (device) size=4 data=b54cda06
+read  addr=40001000 (device) size=4
+write addr=20000018 (normal) size=4 data=00000006
+write addr=40001000 (device) size=4 data=538453c7
+read  addr=40001000 (device) size=4
+write addr=2000001c (normal) size=4 data=00000007
+write addr=40001000 (device) size=4 data=f1bbcd88
+read  addr=40001000 (device) size=4
+write addr=20000020 (normal) size=4 data=00000008
+write addr=40001000 (device) size=4 data=8ff34709
+read  addr=40001000 (device) size=4
+write addr=20000024 (normal) size=4 data=00000009
+write addr=40001000 (device) size=4 data=2e2ac0ca
+read  addr=40001000 (device) size=4
+write addr=20000028 (normal) size=4 data=0000000a
+write addr=40001000 (device) size=4 data=cc623a8b
+read  addr=40001000 (device) size=4
+write addr=2000002c (normal) size=4 data=0000000b
+write addr=40001000 (device) size=4 data=6a99b44c
+read  addr=40001000 (device) size=4
+write addr=20000030 (normal) size=4 data=0000000c
+write addr=40001000 (device) size=4 data=08d12dcd
+read  addr=40001000 (device) size=4
+write addr=20000034 (normal) size=4 data=0000000d
+write addr=40001000 (device) size=4 data=a708a78e
+read  addr=40001000 (device) size=4
+write addr=20000038 (normal) size=4 data=0000000e
+write addr=40001000 (device) size=4 data=4540214f
+read  addr=40001000 (device) size=4
+write addr=2000003c (normal) size=4 data=0000000f
+write addr=40001000 (device) size=4 data=e3779b10
+read  addr=40001000 (device) size=4
+write addr=20000040 (normal) size=4 data=00000010
+write addr=40001000 (device) size=4 data=81af14d1
+read  addr=40001000 (device) size=4
+write addr=20000044 (normal) size=4 data=00000011
+write addr=40001000 (device) size=4 data=1fe68e52
+read  addr=40001000 (device) size=4
+write addr=20000048 (normal) size=4 data=00000012
+write addr=40001000 (device) size=4 data=be1e0813
+read  addr=40001000 (device) size=4
+write addr=2000004c (normal) size=4 data=00000013
+write addr=40001000 (device) size=4 data=5c5581d4
+read  addr=40001000 (device) size=4
+write addr=20000050 (normal) size=4 data=00000014
+write addr=40001000 (device) size=4 data=fa8cfb95
+read  addr=40001000 (device) size=4
+write addr=20000054 (normal) size=4 data=00000015
+write addr=40001000 (device) size=4 data=98c47516
+read  addr=40001000 (device) size=4
+write addr=20000058 (normal) size=4 data=00000016
+write addr=40001000 (device) size=4 data=36fbeed7
+read  addr=40001000 (device) size=4
+write addr=2000005c (normal) size=4 data=00000017
+write addr=40001000 (device) size=4 data=d5336898
+read  addr=40001000 (device) size=4
+write addr=20000060 (normal) size=4 data=00000018
+write addr=40001000 (device) size=4 data=736ae259
+read  addr=40001000 (device) size=4
+write addr=20000064 (normal) size=4 data=00000019
+write addr=40001000 (device) size=4 data=11a25bda
+read  addr=40001000 (device) size=4
+write addr=20000068 (normal) size=4 data=0000001a
+write addr=40001000 (device) size=4 data=afd9d59b
+read  addr=40001000 (device) size=4
+write addr=2000006c (normal) size=4 data=0000001b
+write addr=40001000 (device) size=4 data=4e114f5c
+read  addr=40001000 (device) size=4
+write addr=20000070 (normal) size=4 data=0000001c
+write addr=40001000 (device) size=4 data=ec48c91d
+read  addr=40001000 (device) size=4
+write addr=20000074 (normal) size=4 data=0000001d
+write addr=40001000 (device) size=4 data=8a80429e
+read  addr=40001000 (device) size=4
+write addr=20000078 (normal) size=4 data=0000001e
+write addr=40001000 (device) size=4 data=28b7bc5f
+read  addr=40001000 (device) size=4
+write addr=2000007c (normal) size=4 data=0000001f
+write addr=40001000 (device) size=4 data=c6ef3620
+read  addr=40001000 (device) size=4
+write addr=20000080 (normal) size=4 data=00000020
+write addr=40001000 (device) size=4 data=6526afe1
+read  addr=40001000 (device) size=4
+write addr=20000084 (normal) size=4 data=00000021
+write addr=40001000 (device) size=4 data=035e29a2
+read  addr=40001000 (device) size=4
+write addr=20000088 (normal) size=4 data=00000022
+write addr=40001000 (device) size=4 data=a195a323
+read  addr=40001000 (device) size=4
+write addr=2000008c (normal) size=4 data=00000023
+write addr=40001000 (device) size=4 data=3fcd1ce4
+read  addr=40001000 (device) size=4
+write addr=20000090 (normal) size=4 data=00000024
+write addr=40001000 (device) size=4 data=de0496a5
+read  addr=40001000 (device) size=4
+write addr=20000094 (normal) size=4 data=00000025
+write addr=40001000 (device) size=4 data=7c3c1066
+read  addr=40001000 (device) size=4
+write addr=20000098 (normal) size=4 data=00000026
+write addr=40001000 (device) size=4 data=1a7389e7
+read  addr=40001000 (device) size=4
+write addr=2000009c (normal) size=4 data=00000027
+write addr=40001000 (device) size=4 data=b8ab03a8
+read  addr=40001000 (device) size=4
+write addr=200000a0 (normal) size=4 data=00000028
+write addr=40001000 (device) size=4 data=56e27d69
+read  addr=40001000 (device) size=4
+write addr=200000a4 (normal) size=4 data=00000029
+write addr=40001000 (device) size=4 data=f519f72a
+read  addr=40001000 (device) size=4
+write addr=200000a8 (normal) size=4 data=0000002a
+write addr=40001000 (device) size=4 data=935170ab
+read  addr=40001000 (device) size=4
+write addr=200000ac (normal) size=4 data=0000002b
+write addr=40001000 (device) size=4 data=3188ea6c
+read  addr=40001000 (device) size=4
+write addr=200000b0 (normal) size=4 data=0000002c
+write addr=40001000 (device) size=4 data=cfc0642d
+read  addr=40001000 (device) size=4
+write addr=200000b4 (normal) size=4 data=0000002d
+write addr=40001000 (device) size=4 data=6df7ddee
+read  addr=40001000 (device) size=4
+write addr=200000b8 (normal) size=4 data=0000002e
+write addr=40001000 (device) size=4 data=0c2f576f
+read  addr=40001000 (device) size=4
+write addr=200000bc (normal) size=4 data=0000002f
+write addr=40001000 (device) size=4 data=aa66d130
+read  addr=40001000 (device) size=4
+write addr=200000c0 (normal) size=4 data=00000030
+write addr=40001000 (device) size=4 data=489e4af1
+read  addr=40001000 (device) size=4
+write addr=200000c4 (normal) size=4 data=00000031
+write addr=40001000 (device) size=4 data=e6d5c4b2
+read  addr=40001000 (device) size=4
+write addr=200000c8 (normal) size=4 data=00000032
+write addr=40001000 (device) size=4 data=850d3e73
+read  addr=40001000 (device) size=4
+write addr=200000cc (normal) size=4 data=00000033
+write addr=40001000 (device) size=4 data=2344b7f4
+read  addr=40001000 (device) size=4
+write addr=200000d0 (normal) size=4 data=00000034
+write addr=40001000 (device) size=4 data=c17c31b5
+read  addr=40001000 (device) size=4
+write addr=200000d4 (normal) size=4 data=00000035
+write addr=40001000 (device) size=4 data=5fb3ab76
+read  addr=40001000 (device) size=4
+write addr=200000d8 (normal) size=4 data=00000036
+write addr=40001000 (device) size=4 data=fdeb2537
+read  addr=40001000 (device) size=4
+write addr=200000dc (normal) size=4 data=00000037
+write addr=40001000 (device) size=4 data=9c229eb8
+read  addr=40001000 (device) size=4
+write addr=200000e0 (normal) size=4 data=00000038
+write addr=40001000 (device) size=4 data=3a5a1879
+read  addr=40001000 (device) size=4
+write addr=200000e4 (normal) size=4 data=00000039
+write addr=40001000 (device) size=4 data=d891923a
+read  addr=40001000 (device) size=4
+write addr=200000e8 (normal) size=4 data=0000003a
+write addr=40001000 (device) size=4 data=76c90bfb
+read  addr=40001000 (device) size=4
+write addr=200000ec (normal) size=4 data=0000003b
+write addr=40001000 (device) size=4 data=1500857c
+read  addr=40001000 (device) size=4
+write addr=200000f0 (normal) size=4 data=0000003c
+write addr=40001000 (device) size=4 data=b337ff3d
+read  addr=40001000 (device) size=4
+write addr=200000f4 (normal) size=4 data=0000003d
+write addr=40001000 (device) size=4 data=516f78fe
+read  addr=40001000 (device) size=4
+write addr=200000f8 (normal) size=4 data=0000003e
+write addr=40001000 (device) size=4 data=efa6f2bf
+read  addr=40001000 (device) size=4
+write addr=200000fc (normal) size=4 data=0000003f
+write addr=40001004 (device) size=4 data=0000002a
+read  addr=40001000 (device) size=4
+read  addr=40001004 (device) size=4
+write addr=20000100 (normal) size=4 data=0000002a
+write addr=20000104 (normal) size=4 data=0000002a
+write addr=4000107c (device) size=4 data=00000015
+read  addr=40001000 (device) size=4
+read  addr=4000107c (device) size=4
+write addr=20000108 (normal) size=4 data=00000015
+write addr=2000010c (normal) size=4 data=00000015
+write addr=40001800 (device) size=4 data=0000003f
+read  addr=40001000 (device) size=4
+read  addr=40001800 (device) size=4
+write addr=20000110 (normal) size=4 data=0000003f
+write addr=20000114 (normal) size=4 data=0000003f
+write addr=40001ffc (device) size=4 data=00000001
+read  addr=40001000 (device) size=4
+read  addr=40001ffc (device) size=4
+write addr=20000118 (normal) size=4 data=00000001
+write addr=2000011c (normal) size=4 data=00000001
+write addr=40001000 (device) size=4 data=00000008
+read  addr=40001000 (device) size=4
+read  addr=20000008 (normal) size=4
+write addr=20000120 (normal) size=4 data=00000002
+read  addr=40001000 (device) size=4
+write addr=40001000 (device) size=4 data=00000000

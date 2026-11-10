@@ -1,0 +1,193 @@
+// BL forward and back from both halves of a word, returns by BX LR and MOV PC, LR,
+// ADD PC jump tables, BX to computed (and upper-half) addresses
+// 
+// Made by tools/gen_stress.py (just gen-stress); expected outputs from the
+// golden model, tools/thumb_iss.py. Results go to SRAM from 0x20000000.
+@00000000
+08 20        // 0000: movs   r0, #8
+80 46        // 0002: mov    r8, r0
+04 20        // 0004: movs   r0, #4
+81 46        // 0006: mov    r9, r0
+02 20        // 0008: movs   r0, #2
+82 46        // 000a: mov    r10, r0
+01 20        // 000c: movs   r0, #1
+83 46        // 000e: mov    r11, r0
+00 20        // 0010: movs   r0, #0
+84 46        // 0012: mov    r12, r0
+20 26        // 0014: movs   r6, #32
+36 02        // 0016: lsls   r6, r6, #8
+36 02        // 0018: lsls   r6, r6, #8
+36 02        // 001a: lsls   r6, r6, #8
+00 27        // 001c: movs   r7, #0
+07 E0        // 001e: b      main
+01 DE        // 0020: udf    #1          @ must never run
+// sub_lo:
+01 37        // 0022: adds   r7, #1
+70 47        // 0024: bx     r14
+01 DE        // 0026: udf    #1          @ must never run
+00 BF        // 0028: nop
+// sub_hi:
+02 37        // 002a: adds   r7, #2
+F7 46        // 002c: mov    r15, r14
+01 DE        // 002e: udf    #1          @ must never run
+// main:
+FF F7        // 0030: bl     sub_lo
+F7 FF        // 0032: 
+37 60        // 0034: str    r7, [r6, #0]
+04 36        // 0036: adds   r6, #4
+FF F7        // 0038: bl     sub_hi
+F7 FF        // 003a: 
+37 60        // 003c: str    r7, [r6, #0]
+04 36        // 003e: adds   r6, #4
+00 F0        // 0040: bl     sub_fwd
+87 F8        // 0042: 
+37 60        // 0044: str    r7, [r6, #0]
+04 36        // 0046: adds   r6, #4
+00 BF        // 0048: nop
+FF F7        // 004a: bl     sub_lo
+EA FF        // 004c: 
+37 60        // 004e: str    r7, [r6, #0]
+04 36        // 0050: adds   r6, #4
+FF F7        // 0052: bl     sub_hi
+EA FF        // 0054: 
+37 60        // 0056: str    r7, [r6, #0]
+04 36        // 0058: adds   r6, #4
+00 F0        // 005a: bl     sub_fwd
+7A F8        // 005c: 
+37 60        // 005e: str    r7, [r6, #0]
+04 36        // 0060: adds   r6, #4
+FF F7        // 0062: bl     sub_lo
+DE FF        // 0064: 
+37 60        // 0066: str    r7, [r6, #0]
+04 36        // 0068: adds   r6, #4
+FF F7        // 006a: bl     sub_hi
+DE FF        // 006c: 
+37 60        // 006e: str    r7, [r6, #0]
+04 36        // 0070: adds   r6, #4
+00 F0        // 0072: bl     sub_fwd
+6E F8        // 0074: 
+37 60        // 0076: str    r7, [r6, #0]
+04 36        // 0078: adds   r6, #4
+00 BF        // 007a: nop
+FF F7        // 007c: bl     sub_lo
+D1 FF        // 007e: 
+37 60        // 0080: str    r7, [r6, #0]
+04 36        // 0082: adds   r6, #4
+FF F7        // 0084: bl     sub_hi
+D1 FF        // 0086: 
+37 60        // 0088: str    r7, [r6, #0]
+04 36        // 008a: adds   r6, #4
+00 F0        // 008c: bl     sub_fwd
+61 F8        // 008e: 
+37 60        // 0090: str    r7, [r6, #0]
+04 36        // 0092: adds   r6, #4
+02 4B        // 0094: ldr    r3, =blxpool1
+98 47        // 0096: blx    r3
+37 60        // 0098: str    r7, [r6, #0]
+04 36        // 009a: adds   r6, #4
+02 E0        // 009c: b      blxgo2
+00 BF        // 009e: nop    (align)
+// blxpool1:
+23 00        // 00a0: .word  sub_lo + 1
+00 00        // 00a2: 
+// blxgo2:
+02 4B        // 00a4: ldr    r3, =blxpool3
+98 47        // 00a6: blx    r3
+37 60        // 00a8: str    r7, [r6, #0]
+04 36        // 00aa: adds   r6, #4
+02 E0        // 00ac: b      blxgo4
+00 BF        // 00ae: nop    (align)
+// blxpool3:
+2B 00        // 00b0: .word  sub_hi + 1
+00 00        // 00b2: 
+// blxgo4:
+02 4B        // 00b4: ldr    r3, =blxpool5
+98 47        // 00b6: blx    r3
+37 60        // 00b8: str    r7, [r6, #0]
+04 36        // 00ba: adds   r6, #4
+02 E0        // 00bc: b      blxgo6
+00 BF        // 00be: nop    (align)
+// blxpool5:
+53 01        // 00c0: .word  sub_fwd + 1
+00 00        // 00c2: 
+// blxgo6:
+00 20        // 00c4: movs   r0, #0
+87 44        // 00c6: add    r15, r0
+00 BF        // 00c8: nop
+01 37        // 00ca: adds   r7, #1
+05 E0        // 00cc: b      jt_end0
+02 37        // 00ce: adds   r7, #2
+03 E0        // 00d0: b      jt_end0
+04 37        // 00d2: adds   r7, #4
+01 E0        // 00d4: b      jt_end0
+08 37        // 00d6: adds   r7, #8
+FF E7        // 00d8: b      jt_end0
+// jt_end0:
+37 60        // 00da: str    r7, [r6, #0]
+04 36        // 00dc: adds   r6, #4
+04 20        // 00de: movs   r0, #4
+87 44        // 00e0: add    r15, r0
+00 BF        // 00e2: nop
+01 37        // 00e4: adds   r7, #1
+05 E0        // 00e6: b      jt_end1
+02 37        // 00e8: adds   r7, #2
+03 E0        // 00ea: b      jt_end1
+04 37        // 00ec: adds   r7, #4
+01 E0        // 00ee: b      jt_end1
+08 37        // 00f0: adds   r7, #8
+FF E7        // 00f2: b      jt_end1
+// jt_end1:
+37 60        // 00f4: str    r7, [r6, #0]
+04 36        // 00f6: adds   r6, #4
+08 20        // 00f8: movs   r0, #8
+87 44        // 00fa: add    r15, r0
+00 BF        // 00fc: nop
+01 37        // 00fe: adds   r7, #1
+05 E0        // 0100: b      jt_end2
+02 37        // 0102: adds   r7, #2
+03 E0        // 0104: b      jt_end2
+04 37        // 0106: adds   r7, #4
+01 E0        // 0108: b      jt_end2
+08 37        // 010a: adds   r7, #8
+FF E7        // 010c: b      jt_end2
+// jt_end2:
+37 60        // 010e: str    r7, [r6, #0]
+04 36        // 0110: adds   r6, #4
+0C 20        // 0112: movs   r0, #12
+87 44        // 0114: add    r15, r0
+00 BF        // 0116: nop
+01 37        // 0118: adds   r7, #1
+05 E0        // 011a: b      jt_end3
+02 37        // 011c: adds   r7, #2
+03 E0        // 011e: b      jt_end3
+04 37        // 0120: adds   r7, #4
+01 E0        // 0122: b      jt_end3
+08 37        // 0124: adds   r7, #8
+FF E7        // 0126: b      jt_end3
+// jt_end3:
+37 60        // 0128: str    r7, [r6, #0]
+04 36        // 012a: adds   r6, #4
+02 A3        // 012c: adr    r3, #8
+01 33        // 012e: adds   r3, #1
+18 47        // 0130: bx     r3
+01 DE        // 0132: udf    #1          @ must never run
+01 DE        // 0134: udf    #1          @ must never run
+00 BF        // 0136: nop    (align)
+0A 37        // 0138: adds   r7, #10
+37 60        // 013a: str    r7, [r6, #0]
+04 36        // 013c: adds   r6, #4
+02 A3        // 013e: adr    r3, #8
+03 33        // 0140: adds   r3, #3
+18 47        // 0142: bx     r3
+01 DE        // 0144: udf    #1          @ must never run
+01 DE        // 0146: udf    #1          @ must never run
+00 BF        // 0148: nop
+0A 37        // 014a: adds   r7, #10
+37 60        // 014c: str    r7, [r6, #0]
+04 36        // 014e: adds   r6, #4
+00 DE        // 0150: udf    #0          @ halt
+// sub_fwd:
+04 37        // 0152: adds   r7, #4
+70 46        // 0154: mov    r0, r14
+00 47        // 0156: bx     r0
+01 DE        // 0158: udf    #1          @ must never run

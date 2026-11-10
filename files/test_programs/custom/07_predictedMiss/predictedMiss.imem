@@ -1,0 +1,19 @@
+// A backward B<cond> is predicted taken, but isn't: execute must send fetch
+// back to the fall-through. The target of the prediction is a B, which runs
+// in between. Each udf (a halt) is somewhere that must never run.
+//
+// When it halts, DMEM holds 0x00000007 at 0x20000000.
+@00000000
+00 21        // movs  r1, #0
+00 29        // cmp   r1, #0          @ Z = 1
+// back:
+00 E0        // b     fwd             @ 0x04
+00 DE        // udf   #0              @ 0x06: must never run
+// fwd:
+FC D1        // bne   back            @ 0x08: predicted taken, not taken
+// good:
+20 20        // movs  r0, #32
+00 06        // lsls  r0, r0, #24     @ r0 = 0x20000000
+07 21        // movs  r1, #7
+01 60        // str   r1, [r0, #0]
+00 DE        // udf   #0

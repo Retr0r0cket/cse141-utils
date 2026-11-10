@@ -1,0 +1,80 @@
+// Prefetch stress from the start: loads from Code on every other instruction
+// beginning at instruction 4 (the first that may read r0 after movs r0, #0),
+// while the prefetch queue is still filling after reset. The last word loaded
+// (Code 124: instructions 62 and 63) is stored to SRAM 0.
+
+@00000000
+00 20        // movs  r0, #0
+01 23        // movs  r3, #1
+00 BF        // nop
+00 BF        // nop
+01 68        // ldr   r1, [r0, #0]
+5B 07        // lsls  r3, r3, #29
+41 68        // ldr   r1, [r0, #4]
+00 BF        // nop
+81 68        // ldr   r1, [r0, #8]
+00 BF        // nop
+C1 68        // ldr   r1, [r0, #12]
+00 BF        // nop
+01 69        // ldr   r1, [r0, #16]
+00 BF        // nop
+41 69        // ldr   r1, [r0, #20]
+00 BF        // nop
+81 69        // ldr   r1, [r0, #24]
+00 BF        // nop
+C1 69        // ldr   r1, [r0, #28]
+00 BF        // nop
+01 6A        // ldr   r1, [r0, #32]
+00 BF        // nop
+41 6A        // ldr   r1, [r0, #36]
+00 BF        // nop
+81 6A        // ldr   r1, [r0, #40]
+00 BF        // nop
+C1 6A        // ldr   r1, [r0, #44]
+00 BF        // nop
+01 6B        // ldr   r1, [r0, #48]
+00 BF        // nop
+41 6B        // ldr   r1, [r0, #52]
+00 BF        // nop
+81 6B        // ldr   r1, [r0, #56]
+00 BF        // nop
+C1 6B        // ldr   r1, [r0, #60]
+00 BF        // nop
+01 6C        // ldr   r1, [r0, #64]
+00 BF        // nop
+41 6C        // ldr   r1, [r0, #68]
+00 BF        // nop
+81 6C        // ldr   r1, [r0, #72]
+00 BF        // nop
+C1 6C        // ldr   r1, [r0, #76]
+00 BF        // nop
+01 6D        // ldr   r1, [r0, #80]
+00 BF        // nop
+41 6D        // ldr   r1, [r0, #84]
+00 BF        // nop
+81 6D        // ldr   r1, [r0, #88]
+00 BF        // nop
+C1 6D        // ldr   r1, [r0, #92]
+00 BF        // nop
+01 6E        // ldr   r1, [r0, #96]
+00 BF        // nop
+41 6E        // ldr   r1, [r0, #100]
+00 BF        // nop
+81 6E        // ldr   r1, [r0, #104]
+00 BF        // nop
+C1 6E        // ldr   r1, [r0, #108]
+00 BF        // nop
+01 6F        // ldr   r1, [r0, #112]
+00 BF        // nop
+41 6F        // ldr   r1, [r0, #116]
+00 BF        // nop
+81 6F        // ldr   r1, [r0, #120]
+00 BF        // nop
+C1 6F        // ldr   r1, [r0, #124]
+00 BF        // nop
+00 BF        // nop
+00 BF        // nop
+00 BF        // nop
+19 60        // str   r1, [r3, #0]
+00 BF        // nop
+00 DE        // udf   #0 (halt)

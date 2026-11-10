@@ -1,0 +1,26 @@
+// The halt inside a call, right after a store
+// 
+// Made by tools/gen_stress.py (just gen-stress); expected outputs from the
+// golden model, tools/thumb_iss.py. Results go to SRAM from 0x20000000.
+@00000000
+08 20        // 0000: movs   r0, #8
+80 46        // 0002: mov    r8, r0
+04 20        // 0004: movs   r0, #4
+81 46        // 0006: mov    r9, r0
+02 20        // 0008: movs   r0, #2
+82 46        // 000a: mov    r10, r0
+01 20        // 000c: movs   r0, #1
+83 46        // 000e: mov    r11, r0
+00 20        // 0010: movs   r0, #0
+84 46        // 0012: mov    r12, r0
+20 26        // 0014: movs   r6, #32
+36 02        // 0016: lsls   r6, r6, #8
+36 02        // 0018: lsls   r6, r6, #8
+36 02        // 001a: lsls   r6, r6, #8
+66 20        // 001c: movs   r0, #102
+00 F0        // 001e: bl     leaf
+01 F8        // 0020: 
+01 DE        // 0022: udf    #1          @ must never run
+// leaf:
+30 60        // 0024: str    r0, [r6, #0]
+00 DE        // 0026: udf    #0          @ halt

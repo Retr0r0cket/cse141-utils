@@ -1,0 +1,28 @@
+// A store right before the halt: its data phase ends no later than the halt
+// 
+// Made by tools/gen_stress.py (just gen-stress); expected outputs from the
+// golden model, tools/thumb_iss.py. Results go to SRAM from 0x20000000.
+@00000000
+08 20        // 0000: movs   r0, #8
+80 46        // 0002: mov    r8, r0
+04 20        // 0004: movs   r0, #4
+81 46        // 0006: mov    r9, r0
+02 20        // 0008: movs   r0, #2
+82 46        // 000a: mov    r10, r0
+01 20        // 000c: movs   r0, #1
+83 46        // 000e: mov    r11, r0
+00 20        // 0010: movs   r0, #0
+84 46        // 0012: mov    r12, r0
+20 26        // 0014: movs   r6, #32
+36 02        // 0016: lsls   r6, r6, #8
+36 02        // 0018: lsls   r6, r6, #8
+36 02        // 001a: lsls   r6, r6, #8
+12 20        // 001c: movs   r0, #18
+00 02        // 001e: lsls   r0, r0, #8
+34 30        // 0020: adds   r0, #52
+00 02        // 0022: lsls   r0, r0, #8
+56 30        // 0024: adds   r0, #86
+00 02        // 0026: lsls   r0, r0, #8
+78 30        // 0028: adds   r0, #120
+30 60        // 002a: str    r0, [r6, #0]
+00 DE        // 002c: udf    #0          @ halt

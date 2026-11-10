@@ -1,0 +1,2 @@
+// Expected loads and stores on the bus, in order (normal loads aren't checked).
+write addr=20000000 (normal) size=4 data=00000055

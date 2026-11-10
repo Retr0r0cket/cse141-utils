@@ -1,0 +1,492 @@
+// Forwarding (load producers): each result used 1 to 4 instructions later, as
+// operand A, B, store data, shift amount, shift data, address offset, compare, MOV
+// 
+// Made by tools/gen_stress.py (just gen-stress); expected outputs from the
+// golden model, tools/thumb_iss.py. Results go to SRAM from 0x20000000.
+@00000000
+08 20        // 0000: movs   r0, #8
+80 46        // 0002: mov    r8, r0
+04 20        // 0004: movs   r0, #4
+81 46        // 0006: mov    r9, r0
+02 20        // 0008: movs   r0, #2
+82 46        // 000a: mov    r10, r0
+01 20        // 000c: movs   r0, #1
+83 46        // 000e: mov    r11, r0
+00 20        // 0010: movs   r0, #0
+84 46        // 0012: mov    r12, r0
+20 26        // 0014: movs   r6, #32
+36 02        // 0016: lsls   r6, r6, #8
+36 02        // 0018: lsls   r6, r6, #8
+36 02        // 001a: lsls   r6, r6, #8
+20 24        // 001c: movs   r4, #32
+24 02        // 001e: lsls   r4, r4, #8
+24 02        // 0020: lsls   r4, r4, #8
+03 34        // 0022: adds   r4, #3
+24 02        // 0024: lsls   r4, r4, #8
+0D 25        // 0026: movs   r5, #13
+2D 02        // 0028: lsls   r5, r5, #8
+0C 35        // 002a: adds   r5, #12
+2D 02        // 002c: lsls   r5, r5, #8
+0B 35        // 002e: adds   r5, #11
+2D 02        // 0030: lsls   r5, r5, #8
+0A 35        // 0032: adds   r5, #10
+25 60        // 0034: str    r5, [r4, #0]
+11 25        // 0036: movs   r5, #17
+2D 02        // 0038: lsls   r5, r5, #8
+10 35        // 003a: adds   r5, #16
+2D 02        // 003c: lsls   r5, r5, #8
+0F 35        // 003e: adds   r5, #15
+2D 02        // 0040: lsls   r5, r5, #8
+0E 35        // 0042: adds   r5, #14
+65 60        // 0044: str    r5, [r4, #4]
+15 25        // 0046: movs   r5, #21
+2D 02        // 0048: lsls   r5, r5, #8
+14 35        // 004a: adds   r5, #20
+2D 02        // 004c: lsls   r5, r5, #8
+13 35        // 004e: adds   r5, #19
+2D 02        // 0050: lsls   r5, r5, #8
+12 35        // 0052: adds   r5, #18
+A5 60        // 0054: str    r5, [r4, #8]
+19 25        // 0056: movs   r5, #25
+2D 02        // 0058: lsls   r5, r5, #8
+18 35        // 005a: adds   r5, #24
+2D 02        // 005c: lsls   r5, r5, #8
+17 35        // 005e: adds   r5, #23
+2D 02        // 0060: lsls   r5, r5, #8
+16 35        // 0062: adds   r5, #22
+E5 60        // 0064: str    r5, [r4, #12]
+0D 25        // 0066: movs   r5, #13
+25 61        // 0068: str    r5, [r4, #16]
+41 20        // 006a: movs   r0, #65
+0B 46        // 006c: mov    r3, r1
+0B 46        // 006e: mov    r3, r1
+0B 46        // 0070: mov    r3, r1
+0B 46        // 0072: mov    r3, r1
+03 21        // 0074: movs   r1, #3
+20 69        // 0076: ldr    r0, [r4, #16]
+42 18        // 0078: adds   r2, r0, r1
+32 60        // 007a: str    r2, [r6, #0]
+04 36        // 007c: adds   r6, #4
+42 20        // 007e: movs   r0, #66
+0B 46        // 0080: mov    r3, r1
+0B 46        // 0082: mov    r3, r1
+0B 46        // 0084: mov    r3, r1
+0B 46        // 0086: mov    r3, r1
+03 21        // 0088: movs   r1, #3
+20 69        // 008a: ldr    r0, [r4, #16]
+0A 1A        // 008c: subs   r2, r1, r0
+32 60        // 008e: str    r2, [r6, #0]
+04 36        // 0090: adds   r6, #4
+43 20        // 0092: movs   r0, #67
+0B 46        // 0094: mov    r3, r1
+0B 46        // 0096: mov    r3, r1
+0B 46        // 0098: mov    r3, r1
+0B 46        // 009a: mov    r3, r1
+03 21        // 009c: movs   r1, #3
+20 69        // 009e: ldr    r0, [r4, #16]
+60 61        // 00a0: str    r0, [r4, #20]
+62 69        // 00a2: ldr    r2, [r4, #20]
+32 60        // 00a4: str    r2, [r6, #0]
+04 36        // 00a6: adds   r6, #4
+44 20        // 00a8: movs   r0, #68
+0B 46        // 00aa: mov    r3, r1
+0B 46        // 00ac: mov    r3, r1
+0B 46        // 00ae: mov    r3, r1
+0B 46        // 00b0: mov    r3, r1
+03 21        // 00b2: movs   r1, #3
+20 69        // 00b4: ldr    r0, [r4, #16]
+0A 46        // 00b6: mov    r2, r1
+82 40        // 00b8: lsls   r2, r0
+32 60        // 00ba: str    r2, [r6, #0]
+04 36        // 00bc: adds   r6, #4
+45 20        // 00be: movs   r0, #69
+0B 46        // 00c0: mov    r3, r1
+0B 46        // 00c2: mov    r3, r1
+0B 46        // 00c4: mov    r3, r1
+0B 46        // 00c6: mov    r3, r1
+03 21        // 00c8: movs   r1, #3
+20 69        // 00ca: ldr    r0, [r4, #16]
+C2 00        // 00cc: lsls   r2, r0, #3
+32 60        // 00ce: str    r2, [r6, #0]
+04 36        // 00d0: adds   r6, #4
+46 20        // 00d2: movs   r0, #70
+0B 46        // 00d4: mov    r3, r1
+0B 46        // 00d6: mov    r3, r1
+0B 46        // 00d8: mov    r3, r1
+0B 46        // 00da: mov    r3, r1
+03 21        // 00dc: movs   r1, #3
+20 69        // 00de: ldr    r0, [r4, #16]
+22 5C        // 00e0: ldrb   r2, [r4, r0]
+32 60        // 00e2: str    r2, [r6, #0]
+04 36        // 00e4: adds   r6, #4
+47 20        // 00e6: movs   r0, #71
+0B 46        // 00e8: mov    r3, r1
+0B 46        // 00ea: mov    r3, r1
+0B 46        // 00ec: mov    r3, r1
+0B 46        // 00ee: mov    r3, r1
+03 21        // 00f0: movs   r1, #3
+20 69        // 00f2: ldr    r0, [r4, #16]
+09 28        // 00f4: cmp    r0, #9
+62 46        // 00f6: mov    r2, r12
+00 D5        // 00f8: bpl    f8
+42 44        // 00fa: add    r2, r8
+// f8:
+00 D1        // 00fc: bne    f9
+4A 44        // 00fe: add    r2, r9
+// f9:
+00 D3        // 0100: bcc    f10
+52 44        // 0102: add    r2, r10
+// f10:
+00 D7        // 0104: bvc    f11
+5A 44        // 0106: add    r2, r11
+// f11:
+32 60        // 0108: str    r2, [r6, #0]
+04 36        // 010a: adds   r6, #4
+4C 20        // 010c: movs   r0, #76
+0B 46        // 010e: mov    r3, r1
+0B 46        // 0110: mov    r3, r1
+0B 46        // 0112: mov    r3, r1
+0B 46        // 0114: mov    r3, r1
+03 21        // 0116: movs   r1, #3
+20 69        // 0118: ldr    r0, [r4, #16]
+07 46        // 011a: mov    r7, r0
+3A 46        // 011c: mov    r2, r7
+32 60        // 011e: str    r2, [r6, #0]
+04 36        // 0120: adds   r6, #4
+4D 20        // 0122: movs   r0, #77
+0B 46        // 0124: mov    r3, r1
+0B 46        // 0126: mov    r3, r1
+0B 46        // 0128: mov    r3, r1
+0B 46        // 012a: mov    r3, r1
+03 21        // 012c: movs   r1, #3
+20 69        // 012e: ldr    r0, [r4, #16]
+0B 46        // 0130: mov    r3, r1
+42 18        // 0132: adds   r2, r0, r1
+32 60        // 0134: str    r2, [r6, #0]
+04 36        // 0136: adds   r6, #4
+4E 20        // 0138: movs   r0, #78
+0B 46        // 013a: mov    r3, r1
+0B 46        // 013c: mov    r3, r1
+0B 46        // 013e: mov    r3, r1
+0B 46        // 0140: mov    r3, r1
+03 21        // 0142: movs   r1, #3
+20 69        // 0144: ldr    r0, [r4, #16]
+0B 46        // 0146: mov    r3, r1
+0A 1A        // 0148: subs   r2, r1, r0
+32 60        // 014a: str    r2, [r6, #0]
+04 36        // 014c: adds   r6, #4
+4F 20        // 014e: movs   r0, #79
+0B 46        // 0150: mov    r3, r1
+0B 46        // 0152: mov    r3, r1
+0B 46        // 0154: mov    r3, r1
+0B 46        // 0156: mov    r3, r1
+03 21        // 0158: movs   r1, #3
+20 69        // 015a: ldr    r0, [r4, #16]
+0B 46        // 015c: mov    r3, r1
+60 61        // 015e: str    r0, [r4, #20]
+62 69        // 0160: ldr    r2, [r4, #20]
+32 60        // 0162: str    r2, [r6, #0]
+04 36        // 0164: adds   r6, #4
+50 20        // 0166: movs   r0, #80
+0B 46        // 0168: mov    r3, r1
+0B 46        // 016a: mov    r3, r1
+0B 46        // 016c: mov    r3, r1
+0B 46        // 016e: mov    r3, r1
+03 21        // 0170: movs   r1, #3
+20 69        // 0172: ldr    r0, [r4, #16]
+0B 46        // 0174: mov    r3, r1
+0A 46        // 0176: mov    r2, r1
+82 40        // 0178: lsls   r2, r0
+32 60        // 017a: str    r2, [r6, #0]
+04 36        // 017c: adds   r6, #4
+51 20        // 017e: movs   r0, #81
+0B 46        // 0180: mov    r3, r1
+0B 46        // 0182: mov    r3, r1
+0B 46        // 0184: mov    r3, r1
+0B 46        // 0186: mov    r3, r1
+03 21        // 0188: movs   r1, #3
+20 69        // 018a: ldr    r0, [r4, #16]
+0B 46        // 018c: mov    r3, r1
+C2 00        // 018e: lsls   r2, r0, #3
+32 60        // 0190: str    r2, [r6, #0]
+04 36        // 0192: adds   r6, #4
+52 20        // 0194: movs   r0, #82
+0B 46        // 0196: mov    r3, r1
+0B 46        // 0198: mov    r3, r1
+0B 46        // 019a: mov    r3, r1
+0B 46        // 019c: mov    r3, r1
+03 21        // 019e: movs   r1, #3
+20 69        // 01a0: ldr    r0, [r4, #16]
+0B 46        // 01a2: mov    r3, r1
+22 5C        // 01a4: ldrb   r2, [r4, r0]
+32 60        // 01a6: str    r2, [r6, #0]
+04 36        // 01a8: adds   r6, #4
+53 20        // 01aa: movs   r0, #83
+0B 46        // 01ac: mov    r3, r1
+0B 46        // 01ae: mov    r3, r1
+0B 46        // 01b0: mov    r3, r1
+0B 46        // 01b2: mov    r3, r1
+03 21        // 01b4: movs   r1, #3
+20 69        // 01b6: ldr    r0, [r4, #16]
+0B 46        // 01b8: mov    r3, r1
+09 28        // 01ba: cmp    r0, #9
+62 46        // 01bc: mov    r2, r12
+00 D5        // 01be: bpl    f20
+42 44        // 01c0: add    r2, r8
+// f20:
+00 D1        // 01c2: bne    f21
+4A 44        // 01c4: add    r2, r9
+// f21:
+00 D3        // 01c6: bcc    f22
+52 44        // 01c8: add    r2, r10
+// f22:
+00 D7        // 01ca: bvc    f23
+5A 44        // 01cc: add    r2, r11
+// f23:
+32 60        // 01ce: str    r2, [r6, #0]
+04 36        // 01d0: adds   r6, #4
+58 20        // 01d2: movs   r0, #88
+0B 46        // 01d4: mov    r3, r1
+0B 46        // 01d6: mov    r3, r1
+0B 46        // 01d8: mov    r3, r1
+0B 46        // 01da: mov    r3, r1
+03 21        // 01dc: movs   r1, #3
+20 69        // 01de: ldr    r0, [r4, #16]
+0B 46        // 01e0: mov    r3, r1
+07 46        // 01e2: mov    r7, r0
+3A 46        // 01e4: mov    r2, r7
+32 60        // 01e6: str    r2, [r6, #0]
+04 36        // 01e8: adds   r6, #4
+59 20        // 01ea: movs   r0, #89
+0B 46        // 01ec: mov    r3, r1
+0B 46        // 01ee: mov    r3, r1
+0B 46        // 01f0: mov    r3, r1
+0B 46        // 01f2: mov    r3, r1
+03 21        // 01f4: movs   r1, #3
+20 69        // 01f6: ldr    r0, [r4, #16]
+0B 46        // 01f8: mov    r3, r1
+0B 46        // 01fa: mov    r3, r1
+42 18        // 01fc: adds   r2, r0, r1
+32 60        // 01fe: str    r2, [r6, #0]
+04 36        // 0200: adds   r6, #4
+5A 20        // 0202: movs   r0, #90
+0B 46        // 0204: mov    r3, r1
+0B 46        // 0206: mov    r3, r1
+0B 46        // 0208: mov    r3, r1
+0B 46        // 020a: mov    r3, r1
+03 21        // 020c: movs   r1, #3
+20 69        // 020e: ldr    r0, [r4, #16]
+0B 46        // 0210: mov    r3, r1
+0B 46        // 0212: mov    r3, r1
+0A 1A        // 0214: subs   r2, r1, r0
+32 60        // 0216: str    r2, [r6, #0]
+04 36        // 0218: adds   r6, #4
+5B 20        // 021a: movs   r0, #91
+0B 46        // 021c: mov    r3, r1
+0B 46        // 021e: mov    r3, r1
+0B 46        // 0220: mov    r3, r1
+0B 46        // 0222: mov    r3, r1
+03 21        // 0224: movs   r1, #3
+20 69        // 0226: ldr    r0, [r4, #16]
+0B 46        // 0228: mov    r3, r1
+0B 46        // 022a: mov    r3, r1
+60 61        // 022c: str    r0, [r4, #20]
+62 69        // 022e: ldr    r2, [r4, #20]
+32 60        // 0230: str    r2, [r6, #0]
+04 36        // 0232: adds   r6, #4
+5C 20        // 0234: movs   r0, #92
+0B 46        // 0236: mov    r3, r1
+0B 46        // 0238: mov    r3, r1
+0B 46        // 023a: mov    r3, r1
+0B 46        // 023c: mov    r3, r1
+03 21        // 023e: movs   r1, #3
+20 69        // 0240: ldr    r0, [r4, #16]
+0B 46        // 0242: mov    r3, r1
+0B 46        // 0244: mov    r3, r1
+0A 46        // 0246: mov    r2, r1
+82 40        // 0248: lsls   r2, r0
+32 60        // 024a: str    r2, [r6, #0]
+04 36        // 024c: adds   r6, #4
+5D 20        // 024e: movs   r0, #93
+0B 46        // 0250: mov    r3, r1
+0B 46        // 0252: mov    r3, r1
+0B 46        // 0254: mov    r3, r1
+0B 46        // 0256: mov    r3, r1
+03 21        // 0258: movs   r1, #3
+20 69        // 025a: ldr    r0, [r4, #16]
+0B 46        // 025c: mov    r3, r1
+0B 46        // 025e: mov    r3, r1
+C2 00        // 0260: lsls   r2, r0, #3
+32 60        // 0262: str    r2, [r6, #0]
+04 36        // 0264: adds   r6, #4
+5E 20        // 0266: movs   r0, #94
+0B 46        // 0268: mov    r3, r1
+0B 46        // 026a: mov    r3, r1
+0B 46        // 026c: mov    r3, r1
+0B 46        // 026e: mov    r3, r1
+03 21        // 0270: movs   r1, #3
+20 69        // 0272: ldr    r0, [r4, #16]
+0B 46        // 0274: mov    r3, r1
+0B 46        // 0276: mov    r3, r1
+22 5C        // 0278: ldrb   r2, [r4, r0]
+32 60        // 027a: str    r2, [r6, #0]
+04 36        // 027c: adds   r6, #4
+5F 20        // 027e: movs   r0, #95
+0B 46        // 0280: mov    r3, r1
+0B 46        // 0282: mov    r3, r1
+0B 46        // 0284: mov    r3, r1
+0B 46        // 0286: mov    r3, r1
+03 21        // 0288: movs   r1, #3
+20 69        // 028a: ldr    r0, [r4, #16]
+0B 46        // 028c: mov    r3, r1
+0B 46        // 028e: mov    r3, r1
+09 28        // 0290: cmp    r0, #9
+62 46        // 0292: mov    r2, r12
+00 D5        // 0294: bpl    f32
+42 44        // 0296: add    r2, r8
+// f32:
+00 D1        // 0298: bne    f33
+4A 44        // 029a: add    r2, r9
+// f33:
+00 D3        // 029c: bcc    f34
+52 44        // 029e: add    r2, r10
+// f34:
+00 D7        // 02a0: bvc    f35
+5A 44        // 02a2: add    r2, r11
+// f35:
+32 60        // 02a4: str    r2, [r6, #0]
+04 36        // 02a6: adds   r6, #4
+64 20        // 02a8: movs   r0, #100
+0B 46        // 02aa: mov    r3, r1
+0B 46        // 02ac: mov    r3, r1
+0B 46        // 02ae: mov    r3, r1
+0B 46        // 02b0: mov    r3, r1
+03 21        // 02b2: movs   r1, #3
+20 69        // 02b4: ldr    r0, [r4, #16]
+0B 46        // 02b6: mov    r3, r1
+0B 46        // 02b8: mov    r3, r1
+07 46        // 02ba: mov    r7, r0
+3A 46        // 02bc: mov    r2, r7
+32 60        // 02be: str    r2, [r6, #0]
+04 36        // 02c0: adds   r6, #4
+65 20        // 02c2: movs   r0, #101
+0B 46        // 02c4: mov    r3, r1
+0B 46        // 02c6: mov    r3, r1
+0B 46        // 02c8: mov    r3, r1
+0B 46        // 02ca: mov    r3, r1
+03 21        // 02cc: movs   r1, #3
+20 69        // 02ce: ldr    r0, [r4, #16]
+0B 46        // 02d0: mov    r3, r1
+0B 46        // 02d2: mov    r3, r1
+0B 46        // 02d4: mov    r3, r1
+42 18        // 02d6: adds   r2, r0, r1
+32 60        // 02d8: str    r2, [r6, #0]
+04 36        // 02da: adds   r6, #4
+66 20        // 02dc: movs   r0, #102
+0B 46        // 02de: mov    r3, r1
+0B 46        // 02e0: mov    r3, r1
+0B 46        // 02e2: mov    r3, r1
+0B 46        // 02e4: mov    r3, r1
+03 21        // 02e6: movs   r1, #3
+20 69        // 02e8: ldr    r0, [r4, #16]
+0B 46        // 02ea: mov    r3, r1
+0B 46        // 02ec: mov    r3, r1
+0B 46        // 02ee: mov    r3, r1
+0A 1A        // 02f0: subs   r2, r1, r0
+32 60        // 02f2: str    r2, [r6, #0]
+04 36        // 02f4: adds   r6, #4
+67 20        // 02f6: movs   r0, #103
+0B 46        // 02f8: mov    r3, r1
+0B 46        // 02fa: mov    r3, r1
+0B 46        // 02fc: mov    r3, r1
+0B 46        // 02fe: mov    r3, r1
+03 21        // 0300: movs   r1, #3
+20 69        // 0302: ldr    r0, [r4, #16]
+0B 46        // 0304: mov    r3, r1
+0B 46        // 0306: mov    r3, r1
+0B 46        // 0308: mov    r3, r1
+60 61        // 030a: str    r0, [r4, #20]
+62 69        // 030c: ldr    r2, [r4, #20]
+32 60        // 030e: str    r2, [r6, #0]
+04 36        // 0310: adds   r6, #4
+68 20        // 0312: movs   r0, #104
+0B 46        // 0314: mov    r3, r1
+0B 46        // 0316: mov    r3, r1
+0B 46        // 0318: mov    r3, r1
+0B 46        // 031a: mov    r3, r1
+03 21        // 031c: movs   r1, #3
+20 69        // 031e: ldr    r0, [r4, #16]
+0B 46        // 0320: mov    r3, r1
+0B 46        // 0322: mov    r3, r1
+0B 46        // 0324: mov    r3, r1
+0A 46        // 0326: mov    r2, r1
+82 40        // 0328: lsls   r2, r0
+32 60        // 032a: str    r2, [r6, #0]
+04 36        // 032c: adds   r6, #4
+69 20        // 032e: movs   r0, #105
+0B 46        // 0330: mov    r3, r1
+0B 46        // 0332: mov    r3, r1
+0B 46        // 0334: mov    r3, r1
+0B 46        // 0336: mov    r3, r1
+03 21        // 0338: movs   r1, #3
+20 69        // 033a: ldr    r0, [r4, #16]
+0B 46        // 033c: mov    r3, r1
+0B 46        // 033e: mov    r3, r1
+0B 46        // 0340: mov    r3, r1
+C2 00        // 0342: lsls   r2, r0, #3
+32 60        // 0344: str    r2, [r6, #0]
+04 36        // 0346: adds   r6, #4
+6A 20        // 0348: movs   r0, #106
+0B 46        // 034a: mov    r3, r1
+0B 46        // 034c: mov    r3, r1
+0B 46        // 034e: mov    r3, r1
+0B 46        // 0350: mov    r3, r1
+03 21        // 0352: movs   r1, #3
+20 69        // 0354: ldr    r0, [r4, #16]
+0B 46        // 0356: mov    r3, r1
+0B 46        // 0358: mov    r3, r1
+0B 46        // 035a: mov    r3, r1
+22 5C        // 035c: ldrb   r2, [r4, r0]
+32 60        // 035e: str    r2, [r6, #0]
+04 36        // 0360: adds   r6, #4
+6B 20        // 0362: movs   r0, #107
+0B 46        // 0364: mov    r3, r1
+0B 46        // 0366: mov    r3, r1
+0B 46        // 0368: mov    r3, r1
+0B 46        // 036a: mov    r3, r1
+03 21        // 036c: movs   r1, #3
+20 69        // 036e: ldr    r0, [r4, #16]
+0B 46        // 0370: mov    r3, r1
+0B 46        // 0372: mov    r3, r1
+0B 46        // 0374: mov    r3, r1
+09 28        // 0376: cmp    r0, #9
+62 46        // 0378: mov    r2, r12
+00 D5        // 037a: bpl    f44
+42 44        // 037c: add    r2, r8
+// f44:
+00 D1        // 037e: bne    f45
+4A 44        // 0380: add    r2, r9
+// f45:
+00 D3        // 0382: bcc    f46
+52 44        // 0384: add    r2, r10
+// f46:
+00 D7        // 0386: bvc    f47
+5A 44        // 0388: add    r2, r11
+// f47:
+32 60        // 038a: str    r2, [r6, #0]
+04 36        // 038c: adds   r6, #4
+70 20        // 038e: movs   r0, #112
+0B 46        // 0390: mov    r3, r1
+0B 46        // 0392: mov    r3, r1
+0B 46        // 0394: mov    r3, r1
+0B 46        // 0396: mov    r3, r1
+03 21        // 0398: movs   r1, #3
+20 69        // 039a: ldr    r0, [r4, #16]
+0B 46        // 039c: mov    r3, r1
+0B 46        // 039e: mov    r3, r1
+0B 46        // 03a0: mov    r3, r1
+07 46        // 03a2: mov    r7, r0
+3A 46        // 03a4: mov    r2, r7
+32 60        // 03a6: str    r2, [r6, #0]
+04 36        // 03a8: adds   r6, #4
+00 DE        // 03aa: udf    #0          @ halt

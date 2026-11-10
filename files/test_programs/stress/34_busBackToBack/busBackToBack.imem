@@ -1,0 +1,115 @@
+// Loads and stores with nothing between them: stores of different data back to
+// back, sizes mixed on one word, store then load, peripherals and SRAM interleaved,
+// stores straight after taken branches
+// 
+// Made by tools/gen_stress.py (just gen-stress); expected outputs from the
+// golden model, tools/thumb_iss.py. Results go to SRAM from 0x20000000.
+@00000000
+08 20        // 0000: movs   r0, #8
+80 46        // 0002: mov    r8, r0
+04 20        // 0004: movs   r0, #4
+81 46        // 0006: mov    r9, r0
+02 20        // 0008: movs   r0, #2
+82 46        // 000a: mov    r10, r0
+01 20        // 000c: movs   r0, #1
+83 46        // 000e: mov    r11, r0
+00 20        // 0010: movs   r0, #0
+84 46        // 0012: mov    r12, r0
+20 26        // 0014: movs   r6, #32
+36 02        // 0016: lsls   r6, r6, #8
+36 02        // 0018: lsls   r6, r6, #8
+36 02        // 001a: lsls   r6, r6, #8
+20 25        // 001c: movs   r5, #32
+2D 02        // 001e: lsls   r5, r5, #8
+2D 02        // 0020: lsls   r5, r5, #8
+04 35        // 0022: adds   r5, #4
+2D 02        // 0024: lsls   r5, r5, #8
+40 24        // 0026: movs   r4, #64
+24 02        // 0028: lsls   r4, r4, #8
+24 02        // 002a: lsls   r4, r4, #8
+10 34        // 002c: adds   r4, #16
+24 02        // 002e: lsls   r4, r4, #8
+11 20        // 0030: movs   r0, #17
+00 02        // 0032: lsls   r0, r0, #8
+11 30        // 0034: adds   r0, #17
+00 02        // 0036: lsls   r0, r0, #8
+11 30        // 0038: adds   r0, #17
+00 02        // 003a: lsls   r0, r0, #8
+11 30        // 003c: adds   r0, #17
+22 21        // 003e: movs   r1, #34
+09 02        // 0040: lsls   r1, r1, #8
+22 31        // 0042: adds   r1, #34
+09 02        // 0044: lsls   r1, r1, #8
+22 31        // 0046: adds   r1, #34
+09 02        // 0048: lsls   r1, r1, #8
+22 31        // 004a: adds   r1, #34
+33 22        // 004c: movs   r2, #51
+12 02        // 004e: lsls   r2, r2, #8
+33 32        // 0050: adds   r2, #51
+12 02        // 0052: lsls   r2, r2, #8
+33 32        // 0054: adds   r2, #51
+12 02        // 0056: lsls   r2, r2, #8
+33 32        // 0058: adds   r2, #51
+44 23        // 005a: movs   r3, #68
+1B 02        // 005c: lsls   r3, r3, #8
+44 33        // 005e: adds   r3, #68
+1B 02        // 0060: lsls   r3, r3, #8
+44 33        // 0062: adds   r3, #68
+1B 02        // 0064: lsls   r3, r3, #8
+44 33        // 0066: adds   r3, #68
+5A 27        // 0068: movs   r7, #90
+3F 02        // 006a: lsls   r7, r7, #8
+5A 37        // 006c: adds   r7, #90
+3F 02        // 006e: lsls   r7, r7, #8
+A5 37        // 0070: adds   r7, #165
+3F 02        // 0072: lsls   r7, r7, #8
+A5 37        // 0074: adds   r7, #165
+28 60        // 0076: str    r0, [r5, #0]
+69 60        // 0078: str    r1, [r5, #4]
+AA 60        // 007a: str    r2, [r5, #8]
+EB 60        // 007c: str    r3, [r5, #12]
+28 74        // 007e: strb   r0, [r5, #16]
+69 74        // 0080: strb   r1, [r5, #17]
+6A 82        // 0082: strh   r2, [r5, #18]
+6B 61        // 0084: str    r3, [r5, #20]
+AF 82        // 0086: strh   r7, [r5, #20]
+E9 75        // 0088: strb   r1, [r5, #23]
+AF 61        // 008a: str    r7, [r5, #24]
+AB 69        // 008c: ldr    r3, [r5, #24]
+EB 61        // 008e: str    r3, [r5, #28]
+EA 69        // 0090: ldr    r2, [r5, #28]
+32 60        // 0092: str    r2, [r6, #0]
+04 36        // 0094: adds   r6, #4
+28 68        // 0096: ldr    r0, [r5, #0]
+69 68        // 0098: ldr    r1, [r5, #4]
+2A 69        // 009a: ldr    r2, [r5, #16]
+28 62        // 009c: str    r0, [r5, #32]
+69 62        // 009e: str    r1, [r5, #36]
+AA 62        // 00a0: str    r2, [r5, #40]
+2B 20        // 00a2: movs   r0, #43
+14 21        // 00a4: movs   r1, #20
+20 60        // 00a6: str    r0, [r4, #0]
+EF 62        // 00a8: str    r7, [r5, #44]
+21 60        // 00aa: str    r1, [r4, #0]
+22 68        // 00ac: ldr    r2, [r4, #0]
+2A 63        // 00ae: str    r2, [r5, #48]
+EB 6A        // 00b0: ldr    r3, [r5, #44]
+23 60        // 00b2: str    r3, [r4, #0]
+20 68        // 00b4: ldr    r0, [r4, #0]
+30 60        // 00b6: str    r0, [r6, #0]
+04 36        // 00b8: adds   r6, #4
+08 20        // 00ba: movs   r0, #8
+20 21        // 00bc: movs   r1, #32
+09 02        // 00be: lsls   r1, r1, #8
+09 02        // 00c0: lsls   r1, r1, #8
+04 31        // 00c2: adds   r1, #4
+09 02        // 00c4: lsls   r1, r1, #8
+40 31        // 00c6: adds   r1, #64
+// loop1:
+08 60        // 00c8: str    r0, [r1, #0]
+08 71        // 00ca: strb   r0, [r1, #4]
+08 31        // 00cc: adds   r1, #8
+01 38        // 00ce: subs   r0, #1
+FA D1        // 00d0: bne    loop1
+20 60        // 00d2: str    r0, [r4, #0]
+00 DE        // 00d4: udf    #0          @ halt

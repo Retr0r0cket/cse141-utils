@@ -1,0 +1,3 @@
+// Code for 5494 bytes of program; SRAM for the results
+CODE_SIZE=8192
+SRAM_SIZE=4096

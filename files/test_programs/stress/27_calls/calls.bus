@@ -1,0 +1,25 @@
+// Expected loads and stores on the bus, in order (normal loads aren't checked).
+write addr=20000000 (normal) size=4 data=00000001
+write addr=20000004 (normal) size=4 data=00000003
+write addr=20000008 (normal) size=4 data=00000007
+write addr=2000000c (normal) size=4 data=00000008
+write addr=20000010 (normal) size=4 data=0000000a
+write addr=20000014 (normal) size=4 data=0000000e
+write addr=20000018 (normal) size=4 data=0000000f
+write addr=2000001c (normal) size=4 data=00000011
+write addr=20000020 (normal) size=4 data=00000015
+write addr=20000024 (normal) size=4 data=00000016
+write addr=20000028 (normal) size=4 data=00000018
+write addr=2000002c (normal) size=4 data=0000001c
+read  addr=000000a0 (normal) size=4
+write addr=20000030 (normal) size=4 data=0000001d
+read  addr=000000b0 (normal) size=4
+write addr=20000034 (normal) size=4 data=0000001f
+read  addr=000000c0 (normal) size=4
+write addr=20000038 (normal) size=4 data=00000023
+write addr=2000003c (normal) size=4 data=00000024
+write addr=20000040 (normal) size=4 data=00000026
+write addr=20000044 (normal) size=4 data=0000002a
+write addr=20000048 (normal) size=4 data=00000032
+write addr=2000004c (normal) size=4 data=0000003c
+write addr=20000050 (normal) size=4 data=00000046

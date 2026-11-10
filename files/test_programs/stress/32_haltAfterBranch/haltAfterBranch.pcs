@@ -1,0 +1,19 @@
+// Expected PC of each instruction the core runs, in order, and the halt last.
+pc=00000000
+pc=00000002
+pc=00000004
+pc=00000006
+pc=00000008
+pc=0000000a
+pc=0000000c
+pc=0000000e
+pc=00000010
+pc=00000012
+pc=00000014
+pc=00000016
+pc=00000018
+pc=0000001a
+pc=0000001c
+pc=0000001e
+pc=00000020
+pc=00000026

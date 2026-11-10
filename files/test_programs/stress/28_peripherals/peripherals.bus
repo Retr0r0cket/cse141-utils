@@ -1,0 +1,66 @@
+// Expected loads and stores on the bus, in order (normal loads aren't checked).
+write addr=40001000 (device) size=4 data=00000015
+read  addr=40001000 (device) size=4
+write addr=20000000 (normal) size=4 data=0000002a
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=20000004 (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=20000008 (normal) size=4 data=00000015
+write addr=40001000 (device) size=4 data=0000001c
+read  addr=40001000 (device) size=4
+write addr=2000000c (normal) size=4 data=00000038
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=20000010 (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=20000014 (normal) size=4 data=0000001c
+write addr=40001000 (device) size=4 data=00000023
+read  addr=40001000 (device) size=4
+write addr=20000018 (normal) size=4 data=00000046
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=2000001c (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=20000020 (normal) size=4 data=00000023
+write addr=40001000 (device) size=4 data=0000002a
+read  addr=40001000 (device) size=4
+write addr=20000024 (normal) size=4 data=00000054
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=20000028 (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=2000002c (normal) size=4 data=0000002a
+write addr=40001000 (device) size=4 data=00000031
+read  addr=40001000 (device) size=4
+write addr=20000030 (normal) size=4 data=00000062
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=20000034 (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=20000038 (normal) size=4 data=00000031
+write addr=40001000 (device) size=4 data=00000038
+read  addr=40001000 (device) size=4
+write addr=2000003c (normal) size=4 data=00000070
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=20000040 (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=20000044 (normal) size=4 data=00000038
+write addr=40001000 (device) size=4 data=0000003f
+read  addr=40001000 (device) size=4
+write addr=20000048 (normal) size=4 data=0000007e
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=2000004c (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=20000050 (normal) size=4 data=0000003f
+write addr=40001000 (device) size=4 data=00000046
+read  addr=40001000 (device) size=4
+write addr=20000054 (normal) size=4 data=0000000c
+read  addr=40002004 (device) size=4
+write addr=40002004 (device) size=4 data=00000000
+write addr=20000058 (normal) size=4 data=00000006
+read  addr=40001000 (device) size=4
+write addr=2000005c (normal) size=4 data=00000006
+write addr=40001000 (device) size=4 data=00000000
