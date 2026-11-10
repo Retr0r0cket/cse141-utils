@@ -1,0 +1,3 @@
+// The program may only read the cycle counter, and only while COUNT is at
+// most 250.
+250
