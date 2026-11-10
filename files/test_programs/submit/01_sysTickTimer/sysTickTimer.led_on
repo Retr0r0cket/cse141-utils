@@ -1,3 +1,0 @@
-// The first LED write that turns an LED on must happen with COUNT from
-// 1000 to 1020.
-1000 1020

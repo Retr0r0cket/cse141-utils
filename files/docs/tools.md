@@ -25,8 +25,8 @@ than copying them.
 ## Shared with other repos (cse141-utils)
 
 These tools live in their own repo, `cse141-utils`, next to this one. They're shared with other
-project repos: `student.just`, `tools/`, the shared testbenches, `test_programs/custom`, `stress`
-and `submit`, and this file and `testing.md`. This repo keeps its own committed copies. A
+project repos: `student.just`, `tools/`, the shared testbenches, `test_programs/custom` and `stress`
+(not `submit`: each week submits its own), and this file and `testing.md`. This repo keeps its own committed copies. A
 post-commit hook copies every shared file a commit changes, or adds, back to `cse141-utils`, and
 commits and pushes it there. Pulling changes made elsewhere is optional:
 

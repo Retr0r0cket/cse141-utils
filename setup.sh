@@ -15,8 +15,9 @@
 # Pulling them into other repos is up to you: run install there when you want them.
 #
 # push takes REPO's files as of its last commit (not uncommitted edits): every shared file it
-# changed, and new files where shared files live (tools/, test_programs/custom, stress and
-# submit/, testbench/*_tb.sv, docs/testing.md and tools.md, student.just). It commits them
+# changed, and new files where shared files live (tools/, test_programs/custom and stress/,
+# testbench/*_tb.sv, docs/testing.md and tools.md, student.just). test_programs/submit/ is
+# each week's own, so it's never shared. It commits them
 # here, and pushes this repo unless --no-remote or `git config cse141-utils.autopush false`.
 # A file changed both here and in REPO since they last synced is left alone, unless --force.
 #
@@ -74,7 +75,7 @@ shared_here() {
 # Files in REPO's last commit that are shared, or would be if they were new
 shareable_there() {
   git -C "$repo" ls-tree -r --name-only HEAD -- student.just tools test_programs/custom \
-      test_programs/stress test_programs/submit testbench docs/testing.md docs/tools.md 2>/dev/null |
+      test_programs/stress testbench docs/testing.md docs/tools.md 2>/dev/null |
     grep -v -e '/__pycache__/' -e '\.DS_Store$' |
     while read -r p; do
       case "$p" in

@@ -33,7 +33,7 @@ From then on:
 | `student.just` | The recipes (the course's `justfile` imports it): `score`, `fmax-parallel`, `fmax-parallel-official`, `test-all`, `ahb-suite`, `gen-stress`, `synthesize-mac` and the other `-mac` recipes, `area-modules`, `branch-stats`, `diagram`, `diagram-check`, `utils-*` |
 | `tools/` | The golden model (`thumb_iss.py`), assembler (`thumb_asm.py`), stress generator, fuzzer, score, parallel and official (Docker) fmax, the AHB-Lite suite, `test_all.sh`, area tools, diagram checks, the LED-exact generator |
 | `testbench/` | `ahb_lite_tb` (AHB-Lite protocol checker around `program_tb`), `peripherals_tb` (bus, memory, bridge, LEDs, counter), and the unit testbenches `alu_tb`, `fetch_tb`, `decode_tb` |
-| `test_programs/` | `stress/` (generated, with expected outputs), `custom/`, `submit/` (the LED programs) |
+| `test_programs/` | `stress/` (generated, with expected outputs) and `custom/`. Not `submit/`: what's submitted is each week's own (`tools/gen_led_exact.py` still writes week 6's `ledExact` there when run) |
 | `docs/` | `testing.md`, `tools.md`: how all of the above works |
 
 The course's own files are never shared or touched: `justfile`, `scripts/`, `rtl/`, `program_tb`,

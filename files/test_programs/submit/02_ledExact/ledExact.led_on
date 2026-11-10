@@ -1,4 +1,0 @@
-// The extra credit: LED 5 must turn on (the first write to the LED register
-// with bit 5 set) with COUNT exactly 1000 in that write's access cycle.
-// Only LED 5 counts: LEDs 0-4 may turn on and off before it. See the website.
-1000 1000 5
