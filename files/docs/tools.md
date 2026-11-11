@@ -48,7 +48,7 @@ score.py [--period NS] [--area N] [--cycles N] [--groups level0,...] [--compare 
          [--tests | --test-all] [--synth] [--fmax SEEDS] [--jobs N] [--all] [--official]
 ```
 
-Score = area × time², with time = total cycles × clock period, in µs². Lower is better. By
+Score = area × time², with time = total cycles × clock period, in ms² (cells × ms²). Lower is better. By
 default it reads the latest results:
 
 - **area** from `build/synth-fpga/1_synth_stat.json`, counted by the course's `scripts/area.py`,

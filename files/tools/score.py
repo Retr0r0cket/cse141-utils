@@ -9,7 +9,7 @@ From the week 6 page (https://cseweb.ucsd.edu/classes/fa26/cse141-001/project-we
   - area: cpu_core's area from `just area` (LUTs, ALUs and flip-flops; DSPs and block RAM
     are free)
   - time: the total cycles across all the assembly test programs, times the clock period
-  - score: area x time^2, so 10% faster counts about as much as 20% smaller
+  - score: area x time^2 (time in ms, so cells x ms^2), so 10% faster counts about as much as 20% smaller
 
 The real ranking uses the private programs too, and the clock period measured on a real board;
 this uses what's here:
@@ -176,19 +176,19 @@ def main():
     else:
         period, period_from = args.period, 'given'
 
-    time_us = cycles * period / 1000
-    score = area * time_us ** 2
+    time_ms = cycles * period / 1e6
+    score = area * time_ms ** 2
 
     print(f'Area:    {area:>10}            ({area_from})')
     for group, (p, c) in per_group.items():
         print(f'           {group:8} {c:>6} cycles ({p} programs)')
     print(f'Cycles:  {cycles:>10}            ({cycles_from})')
     print(f'Period:  {period:>10.2f} ns         ({period_from}; {1000 / period:.1f} MHz)')
-    print(f'Time:    {time_us:>10.2f} us')
-    print(f'Score:   {score:>10.0f}            (area x time^2, in us^2; lower is better)')
+    print(f'Time:    {time_ms:>10.4f} ms')
+    print(f'Score:   {score:>10.3f}            (area x time^2, in cells x ms^2; lower is better)')
     if args.compare:
         change = score / args.compare - 1
-        print(f'         {"better" if change < 0 else "worse"} than {args.compare:.0f} by '
+        print(f'         {"better" if change < 0 else "worse"} than {args.compare:g} by '
               f'{abs(change) * 100:.1f}%')
 
 
