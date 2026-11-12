@@ -116,15 +116,15 @@ _utils := `git config cse141-utils.path 2>/dev/null || echo ../cse141-utils`
 [group("Utils")]
 [positional-arguments]
 utils-pull *args:
-  "{{_utils}}/setup.sh" install "$@" .
+  "{{_utils}}/141-utils-mgr.sh" install "$@" .
 
 # Share this repo's committed changes to the shared tools (the hook does this on commit)
 [group("Utils")]
 [positional-arguments]
 utils-push *args:
-  "{{_utils}}/setup.sh" push "$@" .
+  "{{_utils}}/141-utils-mgr.sh" push "$@" .
 
 # Which shared files differ between here and cse141-utils
 [group("Utils")]
 utils-status:
-  "{{_utils}}/setup.sh" status .
+  "{{_utils}}/141-utils-mgr.sh" status .

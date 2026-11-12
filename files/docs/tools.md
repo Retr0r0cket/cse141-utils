@@ -36,7 +36,7 @@ commits and pushes it there. Pulling changes made elsewhere is optional:
 | `just utils-push [--force]` | Share this repo's committed changes now (the hook does it on every commit) |
 | `just utils-status` | Every shared file that differs, and how |
 
-For a new repo, run `../cse141-utils/setup.sh install` there, then commit. See `cse141-utils`'s
+For a new repo, run `../cse141-utils/141-utils-mgr.sh install` there, then commit. See `cse141-utils`'s
 README.
 
 ## Measuring

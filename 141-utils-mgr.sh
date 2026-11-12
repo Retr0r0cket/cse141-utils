@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Share the CSE 141 project tools between repos (see README.md).
 #
-#   setup.sh install [--force] [--no-hook] [REPO]   copy the shared files into REPO (pull)
-#   setup.sh push    [--force] [--no-remote] [REPO] copy REPO's committed changes back here
-#   setup.sh status  [REPO]                         what differs, file by file
+#   141-utils-mgr.sh install [--force] [--no-hook] [REPO]   copy the shared files into REPO (pull)
+#   141-utils-mgr.sh push    [--force] [--no-remote] [REPO] copy REPO's committed changes back here
+#   141-utils-mgr.sh status  [REPO]                         what differs, file by file
 #
 # REPO is a project repo (default: the one you're in). files/ here mirrors a project's layout:
 # files/tools/score.py is tools/score.py there. A project keeps its own committed copies, so
 # nothing it builds or grades depends on this repo being around.
 #
 # install copies every shared file in. A file you've changed in REPO since it last synced is
-# kept, unless --force. It links REPO/setup.sh to this script, and adds a post-commit hook to REPO, which runs `push` after every
+# kept, unless --force. It links REPO/141-utils-mgr.sh to this script, and adds a post-commit hook to REPO, which runs `push` after every
 # commit, so changes made there come back here (and to this repo's remote) by themselves.
 # Pulling them into other repos is up to you: run install there when you want them.
 #
@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-# Resolve symlinks: install links REPO/setup.sh back to this file
+# Resolve symlinks: install links REPO/141-utils-mgr.sh back to this file
 self=$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")
 UTILS=$(cd "$(dirname "$self")" && pwd)
 FILES=$UTILS/files
@@ -92,26 +92,31 @@ install_hook() {
   local h=$gitdir/hooks/post-commit marker='# cse141-utils'
   mkdir -p "$gitdir/hooks"
   git -C "$repo" config cse141-utils.path "$UTILS"
-  if [ -f "$h" ] && grep -q "$marker" "$h"; then return; fi
+  if [ -f "$h" ] && grep -q "$marker" "$h"; then
+    sed -i.bak 's|/setup\.sh|/141-utils-mgr.sh|g' "$h" && rm -f "$h.bak"   # hooks from before the rename
+    return
+  fi
   if [ ! -f "$h" ]; then printf '#!/bin/sh\n' > "$h"; fi
   cat >> "$h" <<'EOF'
 # cse141-utils: share this commit's changes to the shared tools (see cse141-utils/README.md)
-utils=$(git config cse141-utils.path) && [ -x "$utils/setup.sh" ] && "$utils/setup.sh" push --hook || true
+utils=$(git config cse141-utils.path) && [ -x "$utils/141-utils-mgr.sh" ] && "$utils/141-utils-mgr.sh" push --hook || true
 EOF
   chmod +x "$h"
   say "post-commit hook added: commits here share their tool changes with $UTILS"
 }
 
-# REPO/setup.sh -> this script, so a project can run ./setup.sh push/status without the path
+# REPO/141-utils-mgr.sh -> this script, so a project can run ./141-utils-mgr.sh push/status without the path
 link_self() {
-  local l=$repo/setup.sh
+  local l=$repo/141-utils-mgr.sh
+  # the link's old name, from before the rename
+  if [ -L "$repo/setup.sh" ] && [ "$(readlink "$repo/setup.sh")" = "$UTILS/setup.sh" ]; then rm "$repo/setup.sh"; fi
   if [ -L "$l" ]; then
-    [ "$(readlink "$l")" = "$UTILS/setup.sh" ] || ln -sf "$UTILS/setup.sh" "$l"
+    [ "$(readlink "$l")" = "$UTILS/141-utils-mgr.sh" ] || ln -sf "$UTILS/141-utils-mgr.sh" "$l"
   elif [ -e "$l" ]; then
-    say "kept    setup.sh (a regular file is in the way of the symlink)"
+    say "kept    141-utils-mgr.sh (a regular file is in the way of the symlink)"
   else
-    ln -s "$UTILS/setup.sh" "$l"
-    say "symlink added: $l -> $UTILS/setup.sh"
+    ln -s "$UTILS/141-utils-mgr.sh" "$l"
+    say "symlink added: $l -> $UTILS/141-utils-mgr.sh"
   fi
 }
 

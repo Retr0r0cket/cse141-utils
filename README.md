@@ -8,12 +8,12 @@ grades depends on this repo.
 
 ```sh
 # In a project repo (this repo sits next to it, e.g. Project/cse141-utils):
-../cse141-utils/setup.sh install
+../cse141-utils/141-utils-mgr.sh install
 git add -A && git commit -m "Add cse141-utils"
 just --list                  # the shared recipes are in student.just
 ```
 
-`install` also links `setup.sh` in the project to this repo's script. It copies everything in `files/` to the same place in the project. For example,
+`install` also links `141-utils-mgr.sh` in the project to this repo's script. It copies everything in `files/` to the same place in the project. For example,
 `files/tools/score.py` goes to `tools/score.py`. It also adds a post-commit hook.
 
 From then on:
@@ -22,7 +22,7 @@ From then on:
   that commit changed back into `files/` here. That includes new files where shared files live.
   It commits them here and pushes this repo, in the background. Only committed content goes up,
   not uncommitted edits.
-- **Pulling others' changes is up to you.** Run `just utils-pull` (or `setup.sh install`) when
+- **Pulling others' changes is up to you.** Run `just utils-pull` (or `141-utils-mgr.sh install`) when
   you want them. A file you've changed locally is kept unless you pass `--force`.
 - `just utils-status` lists every shared file that differs, and how.
 
@@ -52,12 +52,12 @@ The course's own files are never shared or touched: `justfile`, `scripts/`, `rtl
   expected outputs come from `tools/thumb_iss.py`, so they're right for any correct core.
   `just gen-stress --check` confirms they're up to date.
 
-## setup.sh
+## 141-utils-mgr.sh
 
 ```
-setup.sh install [--force] [--no-hook] [REPO]   copy the shared files into REPO (pull)
-setup.sh push    [--force] [--no-remote] [REPO] copy REPO's committed changes back here
-setup.sh status  [REPO]                         what differs, file by file
+141-utils-mgr.sh install [--force] [--no-hook] [REPO]   copy the shared files into REPO (pull)
+141-utils-mgr.sh push    [--force] [--no-remote] [REPO] copy REPO's committed changes back here
+141-utils-mgr.sh status  [REPO]                         what differs, file by file
 ```
 
 REPO defaults to the repo you're in. What each repo last synced is kept in
