@@ -10,7 +10,7 @@
 # nothing it builds or grades depends on this repo being around.
 #
 # install copies every shared file in. A file you've changed in REPO since it last synced is
-# kept, unless --force. It also adds a post-commit hook to REPO, which runs `push` after every
+# kept, unless --force. It links REPO/setup.sh to this script, and adds a post-commit hook to REPO, which runs `push` after every
 # commit, so changes made there come back here (and to this repo's remote) by themselves.
 # Pulling them into other repos is up to you: run install there when you want them.
 #
@@ -25,7 +25,9 @@
 
 set -euo pipefail
 
-UTILS=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Resolve symlinks: install links REPO/setup.sh back to this file
+self=$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")
+UTILS=$(cd "$(dirname "$self")" && pwd)
 FILES=$UTILS/files
 
 # The course's own testbenches: never shared, never touched
@@ -100,6 +102,19 @@ EOF
   say "post-commit hook added: commits here share their tool changes with $UTILS"
 }
 
+# REPO/setup.sh -> this script, so a project can run ./setup.sh push/status without the path
+link_self() {
+  local l=$repo/setup.sh
+  if [ -L "$l" ]; then
+    [ "$(readlink "$l")" = "$UTILS/setup.sh" ] || ln -sf "$UTILS/setup.sh" "$l"
+  elif [ -e "$l" ]; then
+    say "kept    setup.sh (a regular file is in the way of the symlink)"
+  else
+    ln -s "$UTILS/setup.sh" "$l"
+    say "symlink added: $l -> $UTILS/setup.sh"
+  fi
+}
+
 do_install() {
   local rel src dst up cur was n_new=0 n_upd=0 n_kept=0
   while read -r rel; do
@@ -120,6 +135,7 @@ do_install() {
     fi
   done < <(shared_here)
   say "installed into $repo: $n_new new, $n_upd updated, $n_kept kept as they were"
+  link_self
   if [ "$hook" = 1 ]; then install_hook; fi
 }
 

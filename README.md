@@ -13,7 +13,7 @@ git add -A && git commit -m "Add cse141-utils"
 just --list                  # the shared recipes are in student.just
 ```
 
-`install` copies everything in `files/` to the same place in the project. For example,
+`install` also links `setup.sh` in the project to this repo's script. It copies everything in `files/` to the same place in the project. For example,
 `files/tools/score.py` goes to `tools/score.py`. It also adds a post-commit hook.
 
 From then on:
