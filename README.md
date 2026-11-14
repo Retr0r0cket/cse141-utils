@@ -13,15 +13,21 @@ git add -A && git commit -m "Add cse141-utils"
 just --list                  # the shared recipes are in student.just
 ```
 
-`install` also links `141-utils-mgr.sh` in the project to this repo's script. It copies everything in `files/` to the same place in the project. For example,
-`files/tools/score.py` goes to `tools/score.py`. It also adds a post-commit hook.
+`install` copies everything in `files/` to the same place in the project. For example,
+`files/tools/score.py` goes to `tools/score.py`. It also adds a post-commit hook, and links
+`141-utils-mgr.sh` in the project to this repo's script. The link points into your own checkout,
+so `install` lists it in the project's `.git/info/exclude`: `git add -A` skips it.
 
 From then on:
 
-- **Your changes are shared on commit.** After each commit, the hook copies every shared file
-  that commit changed back into `files/` here. That includes new files where shared files live.
-  It commits them here and pushes this repo, in the background. Only committed content goes up,
-  not uncommitted edits.
+- **Your changes on `main` are shared on commit.** After each commit on the project's main
+  branch, the hook copies every shared file that commit changed back into `files/` here. That
+  includes new files where shared files live. It commits them here and pushes this repo, in the
+  background. Only committed content goes up, not uncommitted edits.
+- **Commits on other branches aren't shared.** The hook says so and does nothing. A branch can
+  have older shared files than the last sync (say, one cut from `main` before a teammate's
+  change), and sharing them would overwrite the newer ones here. They're shared once the branch
+  is merged into `main` and you commit there, or run `./141-utils-mgr.sh push` yourself.
 - **Pulling others' changes is up to you.** Run `just utils-pull` (or `141-utils-mgr.sh install`) when
   you want them. A file you've changed locally is kept unless you pass `--force`.
 - `just utils-status` lists every shared file that differs, and how.
@@ -70,6 +76,10 @@ from another repo.
   (take yours).
 - **Turning off the automatic push to the remote:** `git config cse141-utils.autopush false` in
   the project. Commits here still happen.
+- **Which branch the hook shares:** `git config cse141-utils.branch <name>` in the project. If
+  that isn't set, it's the default branch of the project's `origin`, else `main`. A
+  `push` you run yourself shares from whatever branch you're on, so run it only from a branch
+  that has the newest shared files.
 - **A different location for this repo:** `install` records its path in the project's git config
   (`cse141-utils.path`). The recipes and the hook use that.
 - **Deleting a shared file** isn't propagated. Remove it from `files/` here too.
