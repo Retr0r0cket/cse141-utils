@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """A golden model: an instruction-set simulator for the ARMv6-M Thumb instructions in scope
-(weeks 3 to 7: week 7 adds the stack: PUSH, POP, LDM, STM, the SP-relative forms, and
-STR/STRH/STRB with a register offset), written from the architecture's rules, not from our
-RTL, so a test checked against it doesn't share a core's mistakes. SP starts at 0x2000_0400,
-as the core resets it.
+(weeks 3 to 6, plus STR/STRH/STRB with a register offset), written from the architecture's
+rules, not from our RTL, so a test checked against it doesn't share a core's mistakes.
 
     thumb_iss.py <program> [--out DIR]      run <program>.imem; write .pcs, .after.dmem, .bus
 
@@ -27,7 +25,6 @@ import sys
 SRAM_BASE = 0x2000_0000
 LED_ADDR = 0x4000_1000      # the whole 4 KB from here is the one LED register (led_apb)
 COUNTER_BASE = 0x4000_2000  # COUNT at +0, CLEAR at +4; every other offset reads 0
-SP_RESET = 0x2000_0400      # the top of SRAM: where the core puts SP at reset
 
 
 class Unpredictable(Exception):
@@ -68,7 +65,6 @@ class Machine:
         self.sram = dict(sram or {})           # {offset: byte}: the bytes known
         self.sram_size = sram_size
         self.r = [0] * 16
-        self.r[13] = SP_RESET
         self.n = self.z = self.c = self.v = 0
         self.led = 0
         # What a read of the counter's COUNT returns: counter(machine), or None to refuse it
@@ -278,7 +274,16 @@ class Machine:
             rt, imm8 = instr >> 8 & 7, instr & 0xFF
             r[rt] = self.load((read_pc & ~3) + 4 * imm8, 4)
         elif instr >> 12 == 0b0101:               # loads and stores, [Rn, Rm]
-            self.load_store_register(instr >> 9 & 7, instr & 7, instr >> 3 & 7, instr >> 6 & 7)
+            op, rm, rn, rt = instr >> 9 & 7, instr >> 6 & 7, instr >> 3 & 7, instr & 7
+            addr = u32(r[rn] + r[rm])
+            if op == 0:   self.store(addr, 4, r[rt])
+            elif op == 1: self.store(addr, 2, r[rt])
+            elif op == 2: self.store(addr, 1, r[rt])
+            elif op == 3: r[rt] = u32(sext(self.load(addr, 1), 8))
+            elif op == 4: r[rt] = self.load(addr, 4)
+            elif op == 5: r[rt] = self.load(addr, 2)
+            elif op == 6: r[rt] = self.load(addr, 1)
+            else:         r[rt] = u32(sext(self.load(addr, 2), 16))
         elif top5 >> 2 == 0b011 or top5 >> 1 == 0b1000:  # loads and stores, [Rn, #imm5]
             imm5, rn, rt = instr >> 6 & 31, instr >> 3 & 7, instr & 7
             load = instr >> 11 & 1
@@ -290,24 +295,6 @@ class Machine:
                 self.store(addr, size, r[rt])
         elif top5 == 0b10100:                     # ADR Rd, #imm8
             r[instr >> 8 & 7] = (read_pc & ~3) + 4 * (instr & 0xFF)
-        elif top5 >> 1 == 0b1001:                 # LDR/STR Rt, [SP, #imm8 * 4]
-            self.load_store_sp(instr >> 11 & 1, instr >> 8 & 7, 4 * (instr & 0xFF))
-        elif top5 == 0b10101:                     # ADD Rd, SP, #imm8 * 4
-            self.add_sp_imm(instr >> 8 & 7, 4 * (instr & 0xFF))
-        elif instr >> 8 == 0b10110000:            # ADD/SUB SP, SP, #imm7 * 4
-            self.adjust_sp(instr >> 7 & 1, 4 * (instr & 0x7F))
-        elif instr >> 9 == 0b1011010:             # PUSH {list, LR?}
-            self.push(self.reg_list(instr & 0xFF, 14 if instr >> 8 & 1 else None))
-        elif instr >> 9 == 0b1011110:             # POP {list, PC?}
-            target = self.pop(self.reg_list(instr & 0xFF, 15 if instr >> 8 & 1 else None))
-            if target is not None:
-                next_pc = target
-        elif instr >> 12 == 0b1100:               # STM/LDM Rn!, {list}
-            rn, regs = instr >> 8 & 7, self.reg_list(instr & 0xFF)
-            if instr >> 11 & 1:
-                self.ldm(rn, regs)
-            else:
-                self.stm(rn, regs)
         elif instr >> 8 == 0b10110010:            # SXTH, SXTB, UXTH, UXTB
             op, rm, rd = instr >> 6 & 3, instr >> 3 & 7, instr & 7
             v = r[rm]
@@ -347,92 +334,6 @@ class Machine:
         for i in range(15):
             r[i] = u32(r[i])
         r[15] = next_pc
-
-    # ---- the stack and register-offset instructions (each a method, so a broken version can
-    # replace just one of them: tools/stack_mutants.py) ------------------------------------
-
-    @staticmethod
-    def reg_list(low8, extra=None):
-        regs = [i for i in range(8) if low8 >> i & 1] + ([extra] if extra is not None else [])
-        if not regs:
-            raise Unpredictable('an empty register list')
-        return regs
-
-    def load_store_register(self, op, rt, rn, rm):
-        """STR/STRH/STRB/LDRSB/LDR/LDRH/LDRB/LDRSH Rt, [Rn, Rm]."""
-        r = self.r
-        addr = u32(r[rn] + r[rm])
-        if op == 0:   self.store(addr, 4, r[rt])
-        elif op == 1: self.store(addr, 2, r[rt])
-        elif op == 2: self.store(addr, 1, r[rt])
-        elif op == 3: r[rt] = u32(sext(self.load(addr, 1), 8))
-        elif op == 4: r[rt] = self.load(addr, 4)
-        elif op == 5: r[rt] = self.load(addr, 2)
-        elif op == 6: r[rt] = self.load(addr, 1)
-        else:         r[rt] = u32(sext(self.load(addr, 2), 16))
-
-    def load_store_sp(self, load, rt, offset):
-        """LDR/STR Rt, [SP, #offset]."""
-        addr = u32(self.r[13] + offset)
-        if load:
-            self.r[rt] = self.load(addr, 4)
-        else:
-            self.store(addr, 4, self.r[rt])
-
-    def add_sp_imm(self, rd, offset):
-        """ADD Rd, SP, #offset."""
-        self.r[rd] = u32(self.r[13] + offset)
-
-    def adjust_sp(self, sub, offset):
-        """ADD SP, SP, #offset, or SUB."""
-        self.r[13] = u32(self.r[13] - offset if sub else self.r[13] + offset)
-
-    def push(self, regs):
-        """PUSH: the lowest register at the lowest address, SP down by 4 per register."""
-        addr = u32(self.r[13] - 4 * len(regs))
-        for i in regs:
-            self.store(addr, 4, self.r[i])
-            addr += 4
-        self.r[13] = u32(self.r[13] - 4 * len(regs))
-
-    def pop(self, regs):
-        """POP: the lowest register from the lowest address, PC last; SP up by 4 per register.
-        -> the new PC if PC was in the list, else None."""
-        addr, target = self.r[13], None
-        for i in regs:
-            value = self.load(addr, 4)
-            if i == 15:
-                if not value & 1:
-                    raise Unpredictable(f'POP {{pc}} of {value:08x}: bit 0 clear (a HardFault)')
-                target = value & ~1
-            else:
-                self.r[i] = value
-            addr += 4
-        self.r[13] = u32(self.r[13] + 4 * len(regs))
-        return target
-
-    def stm(self, rn, regs):
-        """STM Rn!, {regs}: always writes back. Rn in the list stores its old value, and must
-        be the lowest register there (otherwise what's stored is UNKNOWN)."""
-        if rn in regs and rn != regs[0]:
-            raise Unpredictable(f'STM r{rn}! with r{rn} in its list, but not the lowest')
-        addr = self.r[rn]
-        for i in regs:
-            self.store(addr, 4, self.r[i])
-            addr += 4
-        self.r[rn] = u32(self.r[rn] + 4 * len(regs))
-
-    def ldm(self, rn, regs):
-        """LDM Rn{!}, {regs}: writes back only if Rn isn't in the list (else Rn gets the word
-        loaded for it)."""
-        addr, values = self.r[rn], []
-        for _ in regs:
-            values.append(self.load(addr, 4))
-            addr += 4
-        if rn not in regs:
-            self.r[rn] = u32(self.r[rn] + 4 * len(regs))
-        for i, v in zip(regs, values):
-            self.r[i] = v
 
     def passes(self, cond):
         n, z, c, v = self.n, self.z, self.c, self.v

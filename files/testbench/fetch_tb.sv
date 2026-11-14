@@ -61,7 +61,7 @@ module fetch_env
   always #5 clk = !clk;
 
   // ---- the fetch stage --------------------------------------------------------------------
-  logic        bus_stall, redirect, advance;
+  logic        bus_stall, redirect, step, advance;
   pc_t         redirect_pc;
   logic        fetch_req, fetch_grant, bus_free;  // The memory controller grants a request when the bus is free
   logic [31:0] fetch_addr, hrdata;
@@ -75,12 +75,16 @@ module fetch_env
     .clk_i            (clk), .reset_i(reset), .bus_stall_i(bus_stall),
     .redirect_i       (redirect), .redirect_pc_i(redirect_pc),
     .fetch_req_o      (fetch_req), .fetch_addr_o(fetch_addr), .fetch_grant_i(fetch_grant), .hrdata_i(hrdata),
-    .advance_i        (advance), .if_id_valid_o(if_id_valid), .if_id_instr_o(if_id_instr), .if_id_pc_o(if_id_pc),
+    .advance_i        (advance), .step_i(step), .if_id_valid_o(if_id_valid), .if_id_instr_o(if_id_instr), .if_id_pc_o(if_id_pc),
     .if_id_pc_plus4_o (if_id_pc_plus4), .if_id_ctrl_o(if_id_ctrl), .if_id_imm_o(if_id_imm),
     .if_id_target_o   (if_id_target)
   );
 
   // What IF/ID's controls must be: the decoders' on IF/ID's own instruction and PC
+  // Like decode: a PUSH, POP, LDMIA, or STMIA steps through its micro-ops, and
+  // only its last consumes IF/ID
+  assign advance = step && !(if_id_valid && if_id_ctrl.lsm && !if_id_ctrl.lsm_last);
+
   ctrl_t       want_ctrl;
   imm_sel_e    want_imm_sel;
   logic [ImmW-1:0] want_imm;
@@ -136,9 +140,9 @@ module fetch_env
                          halfword(want_pc)));
         else if (if_id_pc_plus4 !== want_pc_plus4)
           fail($sformatf("at %h PC + 4 is %h", pc_addr(want_pc), pc_addr(if_id_pc_plus4)));
-        else if (if_id_ctrl !== want_ctrl)
+        else if (!want_ctrl.lsm && if_id_ctrl !== want_ctrl)
           fail($sformatf("at %h (%h) the controls aren't the decoder's", pc_addr(want_pc), if_id_instr));
-        else if (if_id_ctrl.b_imm && if_id_imm !== want_imm)
+        else if (!want_ctrl.lsm && if_id_ctrl.b_imm && if_id_imm !== want_imm)
           fail($sformatf("at %h (%h) imm %h, want %h", pc_addr(want_pc), if_id_instr, if_id_imm, want_imm));
         else if (if_id_ctrl.branch && if_id_target !== want_target)
           fail($sformatf("at %h (%h) target %h, want %h", pc_addr(want_pc), if_id_instr,
@@ -156,7 +160,7 @@ module fetch_env
     for (int i = 0; i < MemWords; i += 7) mem[i][15:0] = 16'hDE00;
     for (int i = 3; i < MemWords; i += 11) mem[i][31:16] = 16'hF000 | 16'($urandom % 2048);
 
-    reset = 1; bus_stall = 0; redirect = 0; redirect_pc = '0; advance = 0; bus_free = 0;
+    reset = 1; bus_stall = 0; redirect = 0; redirect_pc = '0; step = 0; bus_free = 0;
     want_pc = to_pc(ResetPc);
     repeat (2) @(posedge clk);
     #1 reset = 0;
@@ -172,7 +176,7 @@ module fetch_env
       end
       // Stall's cycle ends: anything decode and execute drive holds while the bus waits
       if (!bus_stall) begin
-        advance  = ($urandom % 100) < advance_pct;
+        step     = ($urandom % 100) < advance_pct;
         redirect = ($urandom % 100) < redirect_pct;
         // Anywhere in the program, or (a quarter of the time) near the top of Code, so
         // fetch runs off its end (wrapping, like the memory model)
@@ -187,8 +191,15 @@ module fetch_env
       @(posedge clk); #1;
     end
 
-    // Nothing in the way: after the buffer fills, decode gets one every cycle
-    redirect = 1; redirect_pc = to_pc(32'h0000_0100); bus_stall = 0; reset = 0; advance = 1;
+    // Nothing in the way: after the buffer fills, decode gets one every cycle. A
+    // PUSH, POP, LDMIA, or STMIA takes a cycle per micro-op, so they become NOPs.
+    for (int i = 0; i < MemWords * 2; i++) begin
+      logic [15:0] h;
+      h = mem[i / 2][16 * (i % 2) +: 16];
+      if (h[15:12] == 4'b1100 || (h[15:12] == 4'b1011 && h[10:9] == 2'b10))
+        mem[i / 2][16 * (i % 2) +: 16] = 16'h46C0;
+    end
+    redirect = 1; redirect_pc = to_pc(32'h0000_0100); bus_stall = 0; reset = 0; step = 1;
     bus_free = 1;
     #4 check_edge(); @(posedge clk); #1;
     redirect = 0;

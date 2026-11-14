@@ -396,7 +396,7 @@ module decode_tb;
     .clk_i              (clk), .reset_i(reset), .bus_stall_i(bus_stall),
     .if_id_valid_i      (if_id_valid), .if_id_instr_i(if_id_instr), .if_id_pc_i(if_id_pc),
     .if_id_pc_plus4_i   (if_id_pc_plus4), .if_id_ctrl_i(if_id_ctrl), .if_id_imm_i(if_id_imm),
-    .if_id_target_i     (if_id_target), .advance_o(advance), .flush_i(flush), .hold_i(hold),
+    .if_id_target_i     (if_id_target), .advance_o(advance), .step_o(), .flush_i(flush), .hold_i(hold),
     .id_valid_o         (id_valid), .id_ctrl_o(id_ctrl), .hazard_stall_i(hazard_stall),
     .id_fwd_a_i         (id_fwd_a), .id_fwd_b_i(id_fwd_b), .id_fwd_store_i(id_fwd_store),
     .ex_fwd_a_i         (ex_fwd_a), .ex_fwd_b_i(ex_fwd_b), .ex_fwd_store_i(ex_fwd_store),
