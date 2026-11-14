@@ -10,9 +10,14 @@
 # nothing it builds or grades depends on this repo being around.
 #
 # install copies every shared file in. A file you've changed in REPO since it last synced is
-# kept, unless --force. It links REPO/141-utils-mgr.sh to this script, and adds a post-commit hook to REPO, which runs `push` after every
-# commit, so changes made there come back here (and to this repo's remote) by themselves.
-# Pulling them into other repos is up to you: run install there when you want them.
+# kept, unless --force. It links REPO/141-utils-mgr.sh to this script (and lists the link in
+# REPO's .git/info/exclude, so it's never committed), and adds a post-commit hook to REPO, which
+# runs `push` after every commit on REPO's main branch, so changes made there come back here (and
+# to this repo's remote) by themselves. Commits on other branches aren't shared: what was last
+# synced is kept per repo, not per branch, so a branch with older shared files would push them
+# over newer ones. The branch is `git config cse141-utils.branch` in REPO if set, else the
+# default branch of REPO's origin, else main. Pulling into other repos is up to you: run install
+# there when you want them.
 #
 # push takes REPO's files as of its last commit (not uncommitted edits): every shared file it
 # changed, and new files where shared files live (tools/, test_programs/custom and stress/,
@@ -57,6 +62,14 @@ mkdir -p "$(dirname "$lock")"
 touch "$lock"
 
 say() { [ "$quiet" = 1 ] || echo "$@"; }
+
+# The branch whose commits the hook shares: cse141-utils.branch, else origin's default, else main
+sync_branch() {
+  local b
+  b=$(git -C "$repo" config cse141-utils.branch || true)
+  [ -n "$b" ] || b=$(git -C "$repo" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' || true)
+  echo "${b:-main}"
+}
 hash_file() { shasum -a 256 < "$1" | cut -d' ' -f1; }
 hash_head() { git -C "$repo" show "HEAD:$1" | shasum -a 256 | cut -d' ' -f1; }
 in_head()   { git -C "$repo" cat-file -e "HEAD:$1" 2>/dev/null; }
@@ -102,7 +115,7 @@ install_hook() {
 utils=$(git config cse141-utils.path) && [ -x "$utils/141-utils-mgr.sh" ] && "$utils/141-utils-mgr.sh" push --hook || true
 EOF
   chmod +x "$h"
-  say "post-commit hook added: commits here share their tool changes with $UTILS"
+  say "post-commit hook added: commits on $(sync_branch) here share their tool changes with $UTILS"
 }
 
 # REPO/141-utils-mgr.sh -> this script, so a project can run ./141-utils-mgr.sh push/status without the path
@@ -117,6 +130,15 @@ link_self() {
   else
     ln -s "$UTILS/141-utils-mgr.sh" "$l"
     say "symlink added: $l -> $UTILS/141-utils-mgr.sh"
+  fi
+  # The link points into this checkout, so it's no use to anyone else: keep it out of commits
+  # (`git add -A` included). .git/info/exclude is never committed itself.
+  local exclude
+  exclude=$(cd "$repo" && cd "$(git rev-parse --git-common-dir)" && pwd)/info/exclude
+  mkdir -p "$(dirname "$exclude")"
+  grep -qxF '/141-utils-mgr.sh' "$exclude" 2>/dev/null || printf '/141-utils-mgr.sh\n' >> "$exclude"
+  if git -C "$repo" ls-files --error-unmatch 141-utils-mgr.sh > /dev/null 2>&1; then
+    say "note    141-utils-mgr.sh is committed in $repo: \`git rm --cached 141-utils-mgr.sh\` and commit, so it isn't"
   fi
 }
 
@@ -148,6 +170,17 @@ do_push() {
   local rel src cur up was mode conflicts=0
   local changed=()
   git -C "$repo" rev-parse -q --verify HEAD > /dev/null || { say "nothing committed yet"; return 0; }
+  # The hook shares only the main branch's commits (see the top of this file); a push you run
+  # yourself works from any branch
+  if [ "$quiet" = 1 ]; then
+    local branch main
+    branch=$(git -C "$repo" symbolic-ref -q --short HEAD || true)
+    main=$(sync_branch)
+    if [ "$branch" != "$main" ]; then
+      echo "cse141-utils: not shared (on ${branch:-a detached HEAD}, not $main; \`./141-utils-mgr.sh push\` shares it anyway)" >&2
+      return 0
+    fi
+  fi
   while read -r rel; do
     in_head "$rel" || continue
     src=$FILES/$rel
