@@ -62,7 +62,7 @@ module systick_tb;
       2'b00:   return {15'b0, m_flag, 13'b0, 1'b1, m_tickint, m_enable};  // CLKSOURCE reads 1
       2'b01:   return {8'b0, m_rvr};
       2'b10:   return {8'b0, m_cvr};
-      default: return 0;                                                  // CALIB
+      default: return 32'h8000_0000;                                      // CALIB: NOREF, TENMS unknown
     endcase
   endfunction
 
@@ -162,12 +162,13 @@ module systick_tb;
   task automatic directed();
     logic [31:0] a, b;
 
-    // After reset: everything 0 but CLKSOURCE (the processor clock, the only one)
+    // After reset: everything 0 but CLKSOURCE (the processor clock, the only one) and
+    // CALIB's NOREF (so no reference clock), with TENMS 0 (not known)
     do_reset();
     expect_rd("reset: CSR", Csr, ClkSource);
     expect_rd("reset: RVR", Rvr, 0);
     expect_rd("reset: CVR", Cvr, 0);
-    expect_rd("reset: CALIB", Calib, 0);
+    expect_rd("reset: CALIB", Calib, 32'h8000_0000);
     idle(20);
     expect_rd("disabled after reset: CVR still", Cvr, 0);
 
@@ -178,7 +179,7 @@ module systick_tb;
     expect_rd("RVR", Rvr, 32'h00C3_0F96);
     // CALIB is read-only; TICKINT reads back
     wr(Calib, 32'hFFFF_FFFF);
-    expect_rd("CALIB, read-only", Calib, 0);
+    expect_rd("CALIB, read-only", Calib, 32'h8000_0000);
     wr(Csr, TickInt);
     expect_rd("CSR, TICKINT", Csr, ClkSource | TickInt);
 
