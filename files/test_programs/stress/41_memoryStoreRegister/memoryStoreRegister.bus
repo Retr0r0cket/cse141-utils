@@ -430,3 +430,15 @@ read  addr=20000388 (normal) size=4
 write addr=20000323 (normal) size=1 data=f8
 read  addr=20000320 (normal) size=4
 write addr=2000011c (normal) size=4 data=f888c918
+write addr=20000300 (normal) size=4 data=a5c30f96
+read  addr=20000300 (normal) size=4
+write addr=20000120 (normal) size=4 data=a5c30f96
+write addr=20000304 (normal) size=2 data=0f97
+read  addr=20000304 (normal) size=4
+write addr=20000124 (normal) size=4 data=46c70f97
+write addr=20000308 (normal) size=1 data=98
+read  addr=20000308 (normal) size=4
+write addr=20000128 (normal) size=4 data=ce5eaa98
+write addr=2000030c (normal) size=4 data=a5c30f99
+read  addr=2000030c (normal) size=4
+write addr=2000012c (normal) size=4 data=a5c30f99

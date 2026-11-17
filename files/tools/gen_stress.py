@@ -1159,9 +1159,20 @@ def p_store_register():
                     a.ldst_reg(name, 0, 2, 3)
                     a.ldst_imm('ldr', 1, 4, word)
                     a.save(1)
+    # Offsets that need all 32 bits of Rm: negative (base above the block), and past 16 bits
+    # (base below it)
+    for k, (rm, name) in enumerate(((-0x100, 'str'), (-0x0F_FFFE, 'strh'), (0x1_0003, 'strb'),
+                                    (0x7F_FFF0, 'str'))):
+        a.const(0, 0xA5C3_0F96 + k)
+        a.const(3, rm)
+        a.const(2, 0x2000_0300 + 4 * k - rm)
+        a.ldst_reg(name, 0, 2, 3)
+        a.ldst_imm('ldr', 1, 4, 4 * k)
+        a.save(1)
     a.halt()
     return ['STR/STRH/STRB [Rn, Rm] with its data, base or offset (or all three) made by an ALU',
-            'op or a load 1 to 3 instructions before: a third register read, forwarded'], a
+            'op or a load 1 to 3 instructions before: a third register read, forwarded; and',
+            'offsets that need all 32 bits of Rm (negative, and past 16 bits)'], a
 
 
 PROGRAMS = (
