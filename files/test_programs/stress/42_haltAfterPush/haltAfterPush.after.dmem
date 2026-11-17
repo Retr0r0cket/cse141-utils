@@ -1,0 +1,13 @@
+// Expected DMEM contents after the program halts: every byte written.
+@000003f4 77
+@000003f5 00
+@000003f6 00
+@000003f7 00
+@000003f8 34
+@000003f9 12
+@000003fa 00
+@000003fb 00
+@000003fc 34
+@000003fd 12
+@000003fe 00
+@000003ff 00

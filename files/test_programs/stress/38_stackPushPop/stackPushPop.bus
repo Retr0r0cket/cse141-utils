@@ -1,0 +1,472 @@
+// Expected loads and stores on the bus, in order (normal loads aren't checked).
+write addr=200007fc (normal) size=4 data=00800000
+read  addr=200007fc (normal) size=4
+write addr=20000000 (normal) size=4 data=00800000
+write addr=20000004 (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=00810001
+read  addr=200007fc (normal) size=4
+write addr=20000008 (normal) size=4 data=00810001
+write addr=2000000c (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=00820002
+read  addr=200007fc (normal) size=4
+write addr=20000010 (normal) size=4 data=00820002
+write addr=20000014 (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=00830003
+read  addr=200007fc (normal) size=4
+write addr=20000018 (normal) size=4 data=00830003
+write addr=2000001c (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=00840004
+read  addr=200007fc (normal) size=4
+write addr=20000020 (normal) size=4 data=00840004
+write addr=20000024 (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=00850005
+read  addr=200007fc (normal) size=4
+write addr=20000028 (normal) size=4 data=00850005
+write addr=2000002c (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=20000030
+read  addr=200007fc (normal) size=4
+write addr=20000030 (normal) size=4 data=20000030
+write addr=20000034 (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=00870007
+read  addr=200007fc (normal) size=4
+write addr=20000038 (normal) size=4 data=00870007
+write addr=2000003c (normal) size=4 data=200007fc
+write addr=200007fc (normal) size=4 data=00001e1e
+read  addr=200007fc (normal) size=4
+write addr=20000040 (normal) size=4 data=00001e1e
+write addr=20000044 (normal) size=4 data=200007fc
+write addr=200007e8 (normal) size=4 data=008a0000
+write addr=200007ec (normal) size=4 data=008a0001
+write addr=200007f0 (normal) size=4 data=008a0003
+write addr=200007f4 (normal) size=4 data=008a0004
+write addr=200007f8 (normal) size=4 data=20000048
+write addr=200007fc (normal) size=4 data=00001e0a
+read  addr=200007e8 (normal) size=4
+write addr=20000048 (normal) size=4 data=008a0000
+read  addr=200007ec (normal) size=4
+write addr=2000004c (normal) size=4 data=008a0001
+read  addr=200007f0 (normal) size=4
+write addr=20000050 (normal) size=4 data=008a0003
+read  addr=200007f4 (normal) size=4
+write addr=20000054 (normal) size=4 data=008a0004
+read  addr=200007f8 (normal) size=4
+write addr=20000058 (normal) size=4 data=20000048
+read  addr=200007fc (normal) size=4
+write addr=2000005c (normal) size=4 data=00001e0a
+write addr=20000060 (normal) size=4 data=200007e8
+write addr=200007f4 (normal) size=4 data=008b0004
+write addr=200007f8 (normal) size=4 data=20000064
+write addr=200007fc (normal) size=4 data=008b0007
+read  addr=200007f4 (normal) size=4
+write addr=20000064 (normal) size=4 data=008b0004
+read  addr=200007f8 (normal) size=4
+write addr=20000068 (normal) size=4 data=20000064
+read  addr=200007fc (normal) size=4
+write addr=2000006c (normal) size=4 data=008b0007
+write addr=20000070 (normal) size=4 data=200007f4
+write addr=200007fc (normal) size=4 data=008c0001
+read  addr=200007fc (normal) size=4
+write addr=20000074 (normal) size=4 data=008c0001
+write addr=20000078 (normal) size=4 data=200007fc
+write addr=200007f0 (normal) size=4 data=008d0000
+write addr=200007f4 (normal) size=4 data=008d0004
+write addr=200007f8 (normal) size=4 data=008d0007
+write addr=200007fc (normal) size=4 data=00001e0d
+read  addr=200007f0 (normal) size=4
+write addr=2000007c (normal) size=4 data=008d0000
+read  addr=200007f4 (normal) size=4
+write addr=20000080 (normal) size=4 data=008d0004
+read  addr=200007f8 (normal) size=4
+write addr=20000084 (normal) size=4 data=008d0007
+read  addr=200007fc (normal) size=4
+write addr=20000088 (normal) size=4 data=00001e0d
+write addr=2000008c (normal) size=4 data=200007f0
+write addr=200007ec (normal) size=4 data=008e0000
+write addr=200007f0 (normal) size=4 data=008e0001
+write addr=200007f4 (normal) size=4 data=008e0002
+write addr=200007f8 (normal) size=4 data=008e0003
+write addr=200007fc (normal) size=4 data=008e0007
+read  addr=200007ec (normal) size=4
+write addr=20000090 (normal) size=4 data=008e0000
+read  addr=200007f0 (normal) size=4
+write addr=20000094 (normal) size=4 data=008e0001
+read  addr=200007f4 (normal) size=4
+write addr=20000098 (normal) size=4 data=008e0002
+read  addr=200007f8 (normal) size=4
+write addr=2000009c (normal) size=4 data=008e0003
+read  addr=200007fc (normal) size=4
+write addr=200000a0 (normal) size=4 data=008e0007
+write addr=200000a4 (normal) size=4 data=200007ec
+write addr=200007f0 (normal) size=4 data=008f0000
+write addr=200007f4 (normal) size=4 data=008f0001
+write addr=200007f8 (normal) size=4 data=008f0007
+write addr=200007fc (normal) size=4 data=00001e0f
+read  addr=200007f0 (normal) size=4
+write addr=200000a8 (normal) size=4 data=008f0000
+read  addr=200007f4 (normal) size=4
+write addr=200000ac (normal) size=4 data=008f0001
+read  addr=200007f8 (normal) size=4
+write addr=200000b0 (normal) size=4 data=008f0007
+read  addr=200007fc (normal) size=4
+write addr=200000b4 (normal) size=4 data=00001e0f
+write addr=200000b8 (normal) size=4 data=200007f0
+write addr=200007f0 (normal) size=4 data=00900000
+write addr=200007f4 (normal) size=4 data=00900001
+write addr=200007f8 (normal) size=4 data=200000bc
+write addr=200007fc (normal) size=4 data=00001e10
+read  addr=200007f0 (normal) size=4
+write addr=200000bc (normal) size=4 data=00900000
+read  addr=200007f4 (normal) size=4
+write addr=200000c0 (normal) size=4 data=00900001
+read  addr=200007f8 (normal) size=4
+write addr=200000c4 (normal) size=4 data=200000bc
+read  addr=200007fc (normal) size=4
+write addr=200000c8 (normal) size=4 data=00001e10
+write addr=200000cc (normal) size=4 data=200007f0
+write addr=200007f0 (normal) size=4 data=00910000
+write addr=200007f4 (normal) size=4 data=00910004
+write addr=200007f8 (normal) size=4 data=00910005
+write addr=200007fc (normal) size=4 data=00001e11
+read  addr=200007f0 (normal) size=4
+write addr=200000d0 (normal) size=4 data=00910000
+read  addr=200007f4 (normal) size=4
+write addr=200000d4 (normal) size=4 data=00910004
+read  addr=200007f8 (normal) size=4
+write addr=200000d8 (normal) size=4 data=00910005
+read  addr=200007fc (normal) size=4
+write addr=200000dc (normal) size=4 data=00001e11
+write addr=200000e0 (normal) size=4 data=200007f0
+write addr=200007e8 (normal) size=4 data=00920001
+write addr=200007ec (normal) size=4 data=00920002
+write addr=200007f0 (normal) size=4 data=00920003
+write addr=200007f4 (normal) size=4 data=00920004
+write addr=200007f8 (normal) size=4 data=00920005
+write addr=200007fc (normal) size=4 data=00001e12
+read  addr=200007e8 (normal) size=4
+write addr=200000e4 (normal) size=4 data=00920001
+read  addr=200007ec (normal) size=4
+write addr=200000e8 (normal) size=4 data=00920002
+read  addr=200007f0 (normal) size=4
+write addr=200000ec (normal) size=4 data=00920003
+read  addr=200007f4 (normal) size=4
+write addr=200000f0 (normal) size=4 data=00920004
+read  addr=200007f8 (normal) size=4
+write addr=200000f4 (normal) size=4 data=00920005
+read  addr=200007fc (normal) size=4
+write addr=200000f8 (normal) size=4 data=00001e12
+write addr=200000fc (normal) size=4 data=200007e8
+write addr=200007ec (normal) size=4 data=00930001
+write addr=200007f0 (normal) size=4 data=00930002
+write addr=200007f4 (normal) size=4 data=00930004
+write addr=200007f8 (normal) size=4 data=20000100
+write addr=200007fc (normal) size=4 data=00930007
+read  addr=200007ec (normal) size=4
+write addr=20000100 (normal) size=4 data=00930001
+read  addr=200007f0 (normal) size=4
+write addr=20000104 (normal) size=4 data=00930002
+read  addr=200007f4 (normal) size=4
+write addr=20000108 (normal) size=4 data=00930004
+read  addr=200007f8 (normal) size=4
+write addr=2000010c (normal) size=4 data=20000100
+read  addr=200007fc (normal) size=4
+write addr=20000110 (normal) size=4 data=00930007
+write addr=20000114 (normal) size=4 data=200007ec
+write addr=200007ec (normal) size=4 data=00940000
+write addr=200007f0 (normal) size=4 data=00940002
+write addr=200007f4 (normal) size=4 data=00940003
+write addr=200007f8 (normal) size=4 data=00940005
+write addr=200007fc (normal) size=4 data=00001e14
+read  addr=200007ec (normal) size=4
+write addr=20000118 (normal) size=4 data=00940000
+read  addr=200007f0 (normal) size=4
+write addr=2000011c (normal) size=4 data=00940002
+read  addr=200007f4 (normal) size=4
+write addr=20000120 (normal) size=4 data=00940003
+read  addr=200007f8 (normal) size=4
+write addr=20000124 (normal) size=4 data=00940005
+read  addr=200007fc (normal) size=4
+write addr=20000128 (normal) size=4 data=00001e14
+write addr=2000012c (normal) size=4 data=200007ec
+write addr=200007e4 (normal) size=4 data=00950000
+write addr=200007e8 (normal) size=4 data=00950002
+write addr=200007ec (normal) size=4 data=00950003
+write addr=200007f0 (normal) size=4 data=00950004
+write addr=200007f4 (normal) size=4 data=20000130
+write addr=200007f8 (normal) size=4 data=00950007
+write addr=200007fc (normal) size=4 data=00001e15
+read  addr=200007e4 (normal) size=4
+write addr=20000130 (normal) size=4 data=00950000
+read  addr=200007e8 (normal) size=4
+write addr=20000134 (normal) size=4 data=00950002
+read  addr=200007ec (normal) size=4
+write addr=20000138 (normal) size=4 data=00950003
+read  addr=200007f0 (normal) size=4
+write addr=2000013c (normal) size=4 data=00950004
+read  addr=200007f4 (normal) size=4
+write addr=20000140 (normal) size=4 data=20000130
+read  addr=200007f8 (normal) size=4
+write addr=20000144 (normal) size=4 data=00950007
+read  addr=200007fc (normal) size=4
+write addr=20000148 (normal) size=4 data=00001e15
+write addr=2000014c (normal) size=4 data=200007e4
+write addr=200007dc (normal) size=4 data=00000030
+write addr=200007e0 (normal) size=4 data=009e0001
+write addr=200007e4 (normal) size=4 data=009e0002
+write addr=200007e8 (normal) size=4 data=009e0003
+write addr=200007ec (normal) size=4 data=009e0004
+write addr=200007f0 (normal) size=4 data=009e0005
+write addr=200007f4 (normal) size=4 data=20000150
+write addr=200007f8 (normal) size=4 data=009e0007
+write addr=200007fc (normal) size=4 data=1e1e0000
+read  addr=200007dc (normal) size=4
+write addr=20000150 (normal) size=4 data=00000030
+read  addr=200007e0 (normal) size=4
+write addr=20000154 (normal) size=4 data=009e0001
+read  addr=200007e4 (normal) size=4
+write addr=20000158 (normal) size=4 data=009e0002
+read  addr=200007e8 (normal) size=4
+write addr=2000015c (normal) size=4 data=009e0003
+read  addr=200007ec (normal) size=4
+write addr=20000160 (normal) size=4 data=009e0004
+read  addr=200007f0 (normal) size=4
+write addr=20000164 (normal) size=4 data=009e0005
+read  addr=200007f4 (normal) size=4
+write addr=20000168 (normal) size=4 data=20000150
+read  addr=200007f8 (normal) size=4
+write addr=2000016c (normal) size=4 data=009e0007
+read  addr=200007fc (normal) size=4
+write addr=20000170 (normal) size=4 data=1e1e0000
+write addr=20000174 (normal) size=4 data=200007dc
+write addr=200007f0 (normal) size=4 data=00e80000
+write addr=200007f4 (normal) size=4 data=00e80001
+write addr=200007f8 (normal) size=4 data=00e80002
+write addr=200007fc (normal) size=4 data=00e80003
+read  addr=200007f0 (normal) size=4
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=20000178 (normal) size=4 data=00e80000
+write addr=2000017c (normal) size=4 data=00e80001
+write addr=20000180 (normal) size=4 data=00e80002
+write addr=20000184 (normal) size=4 data=00e80003
+write addr=20000188 (normal) size=4 data=20000800
+write addr=200007f4 (normal) size=4 data=00e90000
+write addr=200007f8 (normal) size=4 data=00e90001
+write addr=200007fc (normal) size=4 data=00e90002
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=2000018c (normal) size=4 data=00e90000
+write addr=20000190 (normal) size=4 data=00e90001
+write addr=20000194 (normal) size=4 data=00e90002
+write addr=20000198 (normal) size=4 data=20000800
+write addr=200007ec (normal) size=4 data=00ea0000
+write addr=200007f0 (normal) size=4 data=00ea0001
+write addr=200007f4 (normal) size=4 data=00ea0002
+write addr=200007f8 (normal) size=4 data=00ea0003
+write addr=200007fc (normal) size=4 data=00ea0004
+read  addr=200007ec (normal) size=4
+read  addr=200007f0 (normal) size=4
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=2000019c (normal) size=4 data=00ea0000
+write addr=200001a0 (normal) size=4 data=00ea0001
+write addr=200001a4 (normal) size=4 data=00ea0002
+write addr=200001a8 (normal) size=4 data=00ea0003
+write addr=200001ac (normal) size=4 data=00ea0004
+write addr=200001b0 (normal) size=4 data=20000800
+write addr=200007ec (normal) size=4 data=00eb0000
+write addr=200007f0 (normal) size=4 data=00eb0001
+write addr=200007f4 (normal) size=4 data=00eb0002
+write addr=200007f8 (normal) size=4 data=00eb0003
+write addr=200007fc (normal) size=4 data=00eb0004
+read  addr=200007ec (normal) size=4
+read  addr=200007f0 (normal) size=4
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=200001b4 (normal) size=4 data=00eb0000
+write addr=200001b8 (normal) size=4 data=00eb0001
+write addr=200001bc (normal) size=4 data=00eb0002
+write addr=200001c0 (normal) size=4 data=00eb0003
+write addr=200001c4 (normal) size=4 data=00eb0004
+write addr=200001c8 (normal) size=4 data=20000800
+write addr=200007f4 (normal) size=4 data=00ec0000
+write addr=200007f8 (normal) size=4 data=00ec0001
+write addr=200007fc (normal) size=4 data=00ec0002
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=200001cc (normal) size=4 data=00ec0000
+write addr=200001d0 (normal) size=4 data=00ec0001
+write addr=200001d4 (normal) size=4 data=00ec0002
+write addr=200001d8 (normal) size=4 data=20000800
+write addr=200007f4 (normal) size=4 data=00ed0000
+write addr=200007f8 (normal) size=4 data=00ed0001
+write addr=200007fc (normal) size=4 data=00ed0002
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=200001dc (normal) size=4 data=00ed0000
+write addr=200001e0 (normal) size=4 data=00ed0001
+write addr=200001e4 (normal) size=4 data=00ed0002
+write addr=200001e8 (normal) size=4 data=20000800
+write addr=200007e8 (normal) size=4 data=00ee0000
+write addr=200007ec (normal) size=4 data=00ee0001
+write addr=200007f0 (normal) size=4 data=00ee0002
+write addr=200007f4 (normal) size=4 data=00ee0003
+write addr=200007f8 (normal) size=4 data=00ee0004
+write addr=200007fc (normal) size=4 data=00ee0005
+read  addr=200007e8 (normal) size=4
+read  addr=200007ec (normal) size=4
+read  addr=200007f0 (normal) size=4
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=200001ec (normal) size=4 data=00ee0000
+write addr=200001f0 (normal) size=4 data=00ee0001
+write addr=200001f4 (normal) size=4 data=00ee0002
+write addr=200001f8 (normal) size=4 data=00ee0003
+write addr=200001fc (normal) size=4 data=00ee0004
+write addr=20000200 (normal) size=4 data=00ee0005
+write addr=20000204 (normal) size=4 data=20000800
+write addr=200007f0 (normal) size=4 data=00ef0000
+write addr=200007f4 (normal) size=4 data=00ef0001
+write addr=200007f8 (normal) size=4 data=00ef0002
+write addr=200007fc (normal) size=4 data=00ef0003
+read  addr=200007f0 (normal) size=4
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=20000208 (normal) size=4 data=00ef0000
+write addr=2000020c (normal) size=4 data=00ef0001
+write addr=20000210 (normal) size=4 data=00ef0002
+write addr=20000214 (normal) size=4 data=00ef0003
+write addr=20000218 (normal) size=4 data=20000800
+write addr=200007f4 (normal) size=4 data=00f00000
+write addr=200007f8 (normal) size=4 data=00f00001
+write addr=200007fc (normal) size=4 data=00f00002
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=2000021c (normal) size=4 data=00f00000
+write addr=20000220 (normal) size=4 data=00f00001
+write addr=20000224 (normal) size=4 data=00f00002
+write addr=20000228 (normal) size=4 data=20000800
+write addr=200007f0 (normal) size=4 data=00f10000
+write addr=200007f4 (normal) size=4 data=00f10001
+write addr=200007f8 (normal) size=4 data=00f10002
+write addr=200007fc (normal) size=4 data=00f10003
+read  addr=200007f0 (normal) size=4
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=2000022c (normal) size=4 data=00f10000
+write addr=20000230 (normal) size=4 data=00f10001
+write addr=20000234 (normal) size=4 data=00f10002
+write addr=20000238 (normal) size=4 data=00f10003
+write addr=2000023c (normal) size=4 data=20000800
+write addr=200007fc (normal) size=4 data=20000240
+read  addr=200007fc (normal) size=4
+write addr=20000240 (normal) size=4 data=20000800
+write addr=200007f0 (normal) size=4 data=00b30000
+write addr=200007f4 (normal) size=4 data=00b30001
+write addr=200007f8 (normal) size=4 data=00b30002
+write addr=200007fc (normal) size=4 data=00b3000a
+read  addr=200007f0 (normal) size=4
+write addr=20000244 (normal) size=4 data=00b30000
+read  addr=200007f4 (normal) size=4
+write addr=20000248 (normal) size=4 data=00b30001
+read  addr=200007f8 (normal) size=4
+write addr=2000024c (normal) size=4 data=00b30002
+read  addr=200007fc (normal) size=4
+write addr=20000250 (normal) size=4 data=00b3000a
+write addr=20000254 (normal) size=4 data=200007f0
+write addr=200007f0 (normal) size=4 data=00b40000
+write addr=200007f4 (normal) size=4 data=00b40001
+write addr=200007f8 (normal) size=4 data=00b40002
+write addr=200007fc (normal) size=4 data=00b4000a
+read  addr=200007f0 (normal) size=4
+write addr=20000258 (normal) size=4 data=00b40000
+read  addr=200007f4 (normal) size=4
+write addr=2000025c (normal) size=4 data=00b40001
+read  addr=200007f8 (normal) size=4
+write addr=20000260 (normal) size=4 data=00b40002
+read  addr=200007fc (normal) size=4
+write addr=20000264 (normal) size=4 data=00b4000a
+write addr=20000268 (normal) size=4 data=200007f0
+write addr=200007f0 (normal) size=4 data=00b50000
+write addr=200007f4 (normal) size=4 data=00b50001
+write addr=200007f8 (normal) size=4 data=00b50002
+write addr=200007fc (normal) size=4 data=00b5000a
+read  addr=200007f0 (normal) size=4
+write addr=2000026c (normal) size=4 data=00b50000
+read  addr=200007f4 (normal) size=4
+write addr=20000270 (normal) size=4 data=00b50001
+read  addr=200007f8 (normal) size=4
+write addr=20000274 (normal) size=4 data=00b50002
+read  addr=200007fc (normal) size=4
+write addr=20000278 (normal) size=4 data=00b5000a
+write addr=2000027c (normal) size=4 data=200007f0
+write addr=200007fc (normal) size=4 data=00000006
+read  addr=200007fc (normal) size=4
+write addr=20000280 (normal) size=4 data=00000006
+write addr=20000284 (normal) size=4 data=200007fc
+write addr=20000c00 (normal) size=4 data=00000099
+read  addr=20000c00 (normal) size=4
+write addr=200007f8 (normal) size=4 data=00000011
+write addr=200007fc (normal) size=4 data=00000099
+read  addr=200007f8 (normal) size=4
+write addr=20000288 (normal) size=4 data=00000011
+read  addr=200007fc (normal) size=4
+write addr=2000028c (normal) size=4 data=00000099
+write addr=20000290 (normal) size=4 data=200007f8
+read  addr=20000c00 (normal) size=4
+write addr=200007fc (normal) size=4 data=00000099
+read  addr=200007fc (normal) size=4
+write addr=20000294 (normal) size=4 data=00000099
+write addr=20000298 (normal) size=4 data=200007fc
+write addr=200007b8 (normal) size=4 data=00bc0001
+write addr=200007bc (normal) size=4 data=00bc0002
+read  addr=200007b8 (normal) size=4
+write addr=2000029c (normal) size=4 data=00bc0001
+read  addr=200007bc (normal) size=4
+write addr=200002a0 (normal) size=4 data=00bc0002
+write addr=200002a4 (normal) size=4 data=200007b8
+write addr=200007f8 (normal) size=4 data=00bd0000
+write addr=200007fc (normal) size=4 data=00bd0001
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=200002a8 (normal) size=4 data=00bd0000
+write addr=200002ac (normal) size=4 data=00bd0001
+write addr=200007fc (normal) size=4 data=00fe0000
+read  addr=200007fc (normal) size=4
+write addr=200002b0 (normal) size=4 data=01fc0000
+write addr=200007f0 (normal) size=4 data=00ff0000
+write addr=200007f4 (normal) size=4 data=00ff0001
+write addr=200007f8 (normal) size=4 data=00ff0002
+write addr=200007fc (normal) size=4 data=00ff0003
+read  addr=200007f0 (normal) size=4
+read  addr=200007f4 (normal) size=4
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=200002b4 (normal) size=4 data=01fe0003
+write addr=200007f8 (normal) size=4 data=00c00000
+write addr=200007fc (normal) size=4 data=00c00001
+read  addr=200007f8 (normal) size=4
+read  addr=200007fc (normal) size=4
+write addr=200007f8 (normal) size=4 data=00c00000
+write addr=200007fc (normal) size=4 data=00c00001
+read  addr=200007f8 (normal) size=4
+write addr=200002b8 (normal) size=4 data=00c00000
+read  addr=200007fc (normal) size=4
+write addr=200002bc (normal) size=4 data=00c00001
+write addr=200002c0 (normal) size=4 data=200007f8
+write addr=200007f8 (normal) size=4 data=00c10000
+write addr=200007fc (normal) size=4 data=00c10001
+read  addr=200007f8 (normal) size=4
+write addr=20000800 (normal) size=4 data=00c10000
+read  addr=20000800 (normal) size=4
+write addr=200002c4 (normal) size=4 data=00c10000
+write addr=200002c8 (normal) size=4 data=20000800

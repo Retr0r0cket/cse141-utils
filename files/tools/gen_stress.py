@@ -655,6 +655,25 @@ def p_halt(case):
         a.label('end')
         a.halt()
         notes = ['The halt at a branch target, with halts on the wrong path']
+    elif case == 'afterPush':
+        a.const(0, 0x77)
+        a.const(1, 0x1234)
+        a.mov_hi(14, 1)
+        a.push([0, 1], lr=True)
+        a.halt()
+        notes = ['A PUSH (three stores) right before the halt: every store happens']
+    elif case == 'afterPopPc':
+        a.const(0, 0x88)
+        a.bl('leaf')
+        a.halt()
+        a.trap()
+        a.label('leaf')
+        a.push([0], lr=True)
+        a.ldst_imm('str', 0, 6, 0)
+        a.pop([0], pc=True)
+        a.trap()
+        a.trap()
+        notes = ['The halt at the return target of a POP {r0, pc}, with traps after the POP']
     else:  # inCall
         a.const(0, 0x66)
         a.bl('leaf')
@@ -664,6 +683,485 @@ def p_halt(case):
         a.halt()
         notes = ['The halt inside a call, right after a store']
     return notes, a
+
+
+# ----------------------------------------------------------------------------------------------
+# The stack (week 7). SP starts at 0x2000_0400; these programs move it to STACK, so pushes go
+# below it and [SP, #imm] above it, clear of the results (0x2000_0000 up) and of BUF.
+
+STACK = 0x2000_0800
+BUF = 0x2000_0C00           # STM/LDM's blocks, 0x40 bytes each
+BUF2 = 0x2000_0A00          # and their edge cases'
+LOW = (0, 1, 2, 3, 4, 5, 7)  # the low registers but r6, the results pointer
+
+
+class Rng:
+    """xorshift32: the same numbers on every Python, so `gen_stress.py --check` is stable."""
+    def __init__(self, seed):
+        self.x = seed or 1
+
+    def bits(self, n):
+        x = self.x
+        x ^= x << 13 & 0xFFFF_FFFF
+        x ^= x >> 17
+        x ^= x << 5 & 0xFFFF_FFFF
+        self.x = x
+        return x & ((1 << n) - 1)
+
+
+def fill(a, regs, tag):
+    """Give each register a value of its own (tag and register number, with bit 23 set), so a
+    word that lands in the wrong slot or register shows."""
+    for r in regs:
+        a.const(r, (0x80 | tag & 0x7F) << 16 | r)
+
+
+def set_sp(a, value, scratch=0):
+    a.const(scratch, value)
+    a.mov_hi(13, scratch)
+
+
+def p_stack_sp():
+    """SP at reset, LDR/STR [SP, #imm], ADD Rd, SP, ADD/SUB SP, and SP used right after it's
+    written."""
+    a = Asm()
+    a.prologue()
+    a.mov_hi(0, 13)                         # SP at reset: 0x2000_0400
+    a.save(0)
+    set_sp(a, STACK)
+    # STR [SP, #imm], every Rt (r6 stores the results pointer as it is), offsets over the whole
+    # range; then LDR back in the other order
+    offsets = (0, 4, 8, 12, 60, 124, 128, 252, 256, 508, 512, 1016, 1020)
+    for k, off in enumerate(offsets):
+        rt = k % 8
+        if rt != 6:
+            a.const(rt, 0x5100 + k)
+        a.str_sp(rt, off)
+    for k, off in enumerate(reversed(offsets)):
+        rt = LOW[k % 7]
+        a.ldr_sp(rt, off)
+        a.save(rt)
+    # ADD Rd, SP, #imm
+    for k, off in enumerate((0, 4, 400, 1020)):
+        a.add_rd_sp(LOW[k], off)
+        a.save(LOW[k])
+    # SUB SP, then a store at the new SP; ADD SP back; then load those words from below
+    for k, off in enumerate((4, 128, 508)):
+        a.sub_sp(off)
+        a.mov_hi(0, 13)
+        a.save(0)
+        a.const(1, 0x6100 + k)
+        a.str_sp(1, 0)
+    for off in (508, 128, 4):
+        a.add_sp(off)
+    a.mov_hi(0, 13)
+    a.save(0)
+    a.sub_sp(508)
+    a.sub_sp(132)                           # SP = STACK - 640: the last store above
+    for off in (0, 508, 636):
+        a.ldr_sp(2, off)
+        a.save(2)
+    a.add_sp(508)
+    a.add_sp(132)
+    # SP written, then used by the very next instruction
+    a.const(0, 0x7100)
+    a.sub_sp(8)
+    a.str_sp(0, 4)                          # a store right after SUB SP
+    a.ldr_sp(1, 4)
+    a.adds_reg(2, 1, 1)                     # a load used right away
+    a.save(2)
+    set_sp(a, STACK - 0x100)
+    a.str_sp(6, 0)                          # a store right after MOV SP
+    a.ldr_sp(3, 0)
+    a.save(3)
+    a.add_sp(4)
+    a.add_rd_sp(4, 0)                       # ADD Rd, SP right after ADD SP
+    a.save(4)
+    a.movs(0, 12)
+    a.add_hi(13, 0)                         # ADD SP, r0
+    a.mov_hi(5, 13)
+    a.save(5)
+    a.movs(7, 8)
+    a.add_hi(7, 13)                         # ADD r7, SP
+    a.save(7)
+    # The results pointer through the stack: loaded back into r6 and used right away
+    a.str_sp(6, 8)
+    a.movs(6, 0)
+    a.ldr_sp(6, 8)
+    a.save(7)
+    a.halt()
+    return ['SP at reset; LDR/STR [SP, #imm] for every Rt over the whole offset range; ADD Rd, SP;',
+            'ADD/SUB SP; ADD SP, Rm; SP (and r6, through the stack) used right after it\'s written'], a
+
+
+def p_push_pop():
+    """PUSH and POP: every register alone, random lists up to all nine, and the hazards around
+    them."""
+    a = Asm()
+    a.prologue()
+    set_sp(a, STACK)
+    rng = Rng(141)
+
+    def check_pushed(n):
+        """Save the n words just pushed (from SP up) and SP, then drop them."""
+        for k in range(n):
+            a.ldr_sp(0, 4 * k)
+            a.save(0)
+        a.mov_hi(0, 13)
+        a.save(0)
+        a.add_sp(4 * n)
+
+    def stack_words(n, tag):
+        """n known words at a new SP, for a POP."""
+        a.sub_sp(4 * n)
+        for k in range(n):
+            a.const(0, (0xC0 | tag & 0x3F) << 16 | k)
+            a.str_sp(0, 4 * k)
+
+    # PUSH: every register alone, LR, random lists, and all nine
+    for r in range(8):
+        fill(a, [r] if r != 6 else [], r)
+        a.push([r])
+        check_pushed(1)
+    a.const(0, 0x1E1E)
+    a.mov_hi(14, 0)
+    a.push([], lr=True)
+    check_pushed(1)
+    for tag in range(10, 22):
+        regs = [r for r in range(8) if rng.bits(1)]
+        lr = bool(rng.bits(1)) or not regs
+        if lr:
+            a.const(0, 0x1E00 | tag)
+            a.mov_hi(14, 0)
+        fill(a, [r for r in regs if r != 6], tag)
+        a.push(regs, lr=lr)
+        check_pushed(len(regs) + lr)
+    fill(a, LOW, 30)
+    a.const(0, 0x1E1E_0000)
+    a.mov_hi(14, 0)
+    a.movs(0, 0x30)
+    a.push(range(8), lr=True)
+    check_pushed(9)
+    # POP: random lists of the low registers (but r6), each register then saved
+    for tag in range(40, 50):
+        regs = [r for r in LOW if rng.bits(1)] or [LOW[tag % 7]]
+        stack_words(len(regs), tag)
+        a.pop(regs)
+        for r in regs:
+            a.save(r)
+        a.mov_hi(0, 13)
+        a.save(0)
+    # POP into r6, used right away as the results pointer
+    a.push([6])
+    a.movs(6, 0)
+    a.pop([6])
+    a.save(0)
+    # A value made right before PUSH, last in its list (the last store), 1 to 3 instructions back
+    for dist in (1, 2, 3):
+        fill(a, [0, 1, 2, 3], 50 + dist)
+        a.adds_imm8(3, 7)
+        for _ in range(dist - 1):
+            a.mov_hi(5, 1)
+        a.push([0, 1, 2, 3])
+        check_pushed(4)
+    a.movs(0, 5)
+    a.adds_imm8(0, 1)
+    a.push([0])                             # an ALU result, the PUSH's only store
+    check_pushed(1)
+    # A load right before PUSH
+    a.const(5, BUF)
+    a.const(0, 0x99)
+    a.ldst_imm('str', 0, 5, 0)
+    a.movs(0, 0x11)
+    a.ldst_imm('ldr', 1, 5, 0)
+    a.push([0, 1])
+    check_pushed(2)
+    a.ldst_imm('ldr', 0, 5, 0)
+    a.push([0])
+    check_pushed(1)
+    # MOV SP right before PUSH
+    fill(a, [1, 2], 60)
+    set_sp(a, STACK - 0x40)
+    a.push([1, 2])
+    check_pushed(2)
+    set_sp(a, STACK)
+    # PUSH then POP straight away, into other registers
+    fill(a, [0, 1], 61)
+    a.push([0, 1])
+    a.pop([2, 3])
+    a.save(2)
+    a.save(3)
+    # POP, then its last register (and its first) used right away
+    stack_words(1, 62)
+    a.pop([0])
+    a.adds_reg(1, 0, 0)
+    a.save(1)
+    stack_words(4, 63)
+    a.pop([0, 1, 2, 3])
+    a.adds_reg(4, 3, 0)
+    a.save(4)
+    # POP then PUSH of the same registers; POP then a store to [SP]
+    stack_words(2, 0)
+    a.pop([1, 2])
+    a.push([1, 2])
+    check_pushed(2)
+    stack_words(2, 1)
+    a.pop([0])
+    a.str_sp(0, 4)
+    a.ldr_sp(1, 4)
+    a.save(1)
+    a.add_sp(4)
+    a.mov_hi(0, 13)
+    a.save(0)
+    a.halt()
+    return ['PUSH of every register alone, LR, random lists, all nine; POP of random lists;',
+            'values made (by ALU, load, MOV SP) right before a PUSH; POP used right away;',
+            'PUSH then POP, POP then PUSH, back to back'], a
+
+
+def p_pop_pc():
+    """Calls that save registers with PUSH {..., lr} and return with POP {..., pc}."""
+    a = Asm()
+    a.prologue()
+    set_sp(a, STACK)
+    a.b('main')
+    a.trap()
+    # leaf: POP {pc} alone
+    a.label('leaf')
+    a.push([], lr=True)
+    a.adds_imm8(7, 1)
+    a.pop([], pc=True)
+    a.trap()
+    a.trap()
+    # mid: saves r4-r7 and LR, clobbers them (r6, the results pointer, too), calls leaf, and
+    # returns a value with the PC: POP {r0, r4-r7, pc}
+    a.label('mid')
+    a.push([4, 5, 6, 7], lr=True)
+    for r in (4, 5, 6, 7):
+        a.movs(r, 0x40 + r)
+    a.bl('leaf')
+    a.mov_hi(0, 7)
+    a.adds_imm8(0, 0x20)
+    a.push([0])
+    a.pop([0, 4, 5, 6, 7], pc=True)
+    a.trap()
+    a.trap()
+    # sum: r0 = 0 + 1 + ... + r0, recursively, keeping r4 and LR on the stack
+    a.label('sum')
+    a.push([4], lr=True)
+    a.lsls_imm(4, 0, 0)                     # movs r4, r0
+    a.cmp_imm(0, 0)
+    a.bcond('eq', 'sum_done')
+    a.subs_imm8(0, 1)
+    a.bl('sum')
+    a.adds_reg(0, 0, 4)
+    a.label('sum_done')
+    a.pop([4], pc=True)
+    a.trap()
+    a.label('main')
+    a.movs(7, 0)
+    # From both halves of a word (the return addresses too)
+    for pad in (0, 1):
+        if pad:
+            a.nop()
+        a.movs(4, 0x14 + pad)
+        a.movs(5, 0x15 + pad)
+        a.bl('leaf')
+        a.save(7)                           # (r6 used right after a POP {pc} return)
+        a.bl('mid')
+        for r in (0, 4, 5, 7):              # r0 returned; r4, r5, r7 kept
+            a.save(r)
+        a.movs(0, 10 + pad)
+        a.bl('sum')
+        a.save(0)
+        a.save(4)
+        a.mov_hi(1, 13)                     # SP back where it was
+        a.save(1)
+    # BLX to mid through a register
+    pool, after = a.fresh('pool'), a.fresh('go')
+    a.ldr_label(3, pool)
+    a.blx(3)
+    a.save(0)
+    a.b(after)
+    a.align4()
+    a.label(pool)
+    a.word_label('mid', 1)
+    a.label(after)
+    # POP {pc} of an address pushed from a register (Thumb bit set), traps on the way
+    pool, target = a.fresh('pool'), a.fresh('target')
+    a.ldr_label(0, pool)
+    a.push([0])
+    a.pop([], pc=True)
+    a.trap()
+    a.trap()
+    a.align4()
+    a.label(pool)
+    a.word_label(target, 1)
+    a.label(target)
+    a.movs(0, 0x5C)
+    a.save(0)
+    a.mov_hi(1, 13)
+    a.save(1)
+    a.halt()
+    return ['PUSH {..., lr} / POP {..., pc}: POP {pc} alone, POP {r0, r4-r7, pc} restoring r6 (used',
+            'right after), recursion 11 and 12 deep, calls from both halves of a word, BLX, POP',
+            '{pc} of a pushed address'], a
+
+
+def p_ldm_stm():
+    """STM and LDM: every base, random lists, the base in the list, and the hazards around
+    them."""
+    a = Asm()
+    a.prologue()
+    rng = Rng(7)
+    # Every base (but r6), two random lists each: STM writes back; LDM loads the words into
+    # other registers, and writes back
+    block = BUF
+    for base in LOW:
+        for tag in range(2):
+            others = [r for r in LOW if r != base]
+            regs = [r for r in others if rng.bits(1)] or [others[tag]]
+            dest = others[-len(regs):] if regs != others[-len(regs):] else others[:len(regs)]
+            fill(a, regs, 8 * base + tag)
+            a.const(base, block)
+            a.stm(base, regs)
+            a.save(base)
+            a.const(base, block)
+            a.ldm(base, dest)
+            for r in dest:
+                a.save(r)
+            a.save(base)
+            block += 0x40
+    # STM with its base the lowest in the list: stores the base's old value
+    fill(a, [1, 2], 20)
+    a.const(0, BUF2)
+    a.stm(0, [0, 1, 2])
+    a.save(0)
+    a.const(7, BUF2)
+    a.ldm(7, [3, 4, 5])
+    for r in (3, 4, 5, 7):
+        a.save(r)
+    # LDM with its base in the list, lowest, middle and highest: no write-back, the base gets
+    # its word
+    fill(a, [0, 1, 2], 21)
+    a.const(3, BUF2 + 0x20)
+    a.stm(3, [0, 1, 2])
+    for base in (2, 3, 4):
+        a.const(base, BUF2 + 0x20)
+        a.ldm(base, [2, 3, 4])
+        for r in (2, 3, 4):
+            a.save(r)
+    # All eight: STM r0!, {r0-r7}, and LDM r7, {r0-r5, r7}
+    fill(a, [1, 2, 3, 4, 5, 7], 22)
+    a.const(0, BUF2 + 0x40)
+    a.stm(0, range(8))
+    a.save(0)
+    a.const(7, BUF2 + 0x40)
+    a.ldm(7, [0, 1, 2, 3, 4, 5, 7])
+    for r in LOW:
+        a.save(r)
+    # The base made right before (ALU, then a load), and the last store's data
+    fill(a, [2, 3], 23)
+    a.const(1, BUF2 + 0x80 - 4)
+    a.adds_imm8(1, 4)
+    a.stm(1, [2, 3])
+    a.save(1)
+    a.const(5, BUF2 + 0x90)
+    a.const(0, BUF2 + 0x80)
+    a.ldst_imm('str', 0, 5, 0)
+    a.ldst_imm('ldr', 1, 5, 0)
+    a.ldm(1, [2, 3])
+    a.save(2)
+    a.save(3)
+    a.save(1)
+    fill(a, [2, 3], 24)
+    a.const(1, BUF2 + 0xA0)
+    a.adds_imm8(3, 1)
+    a.stm(1, [2, 3])
+    a.const(1, BUF2 + 0xA0)
+    a.ldm(1, [4, 5])
+    a.save(4)
+    a.save(5)
+    # LDM, then its last register and its written-back base used right away
+    a.const(1, BUF2 + 0x80)
+    a.ldm(1, [2, 3])
+    a.adds_reg(4, 3, 1)
+    a.save(4)
+    # STM then LDM of the same words, back to back; then LDM's registers stored by STM
+    fill(a, [2, 3], 25)
+    a.const(1, BUF2 + 0xC0)
+    a.const(7, BUF2 + 0xC0)
+    a.stm(1, [2, 3])
+    a.ldm(7, [4, 5])
+    a.stm(1, [4, 5])
+    a.const(7, BUF2 + 0xC8)
+    a.ldm(7, [2, 3])
+    a.save(2)
+    a.save(3)
+    # Over the LED register (the whole 4 KB is the one register): device stores and loads, with
+    # their wait cycles
+    a.const(4, LEDS)
+    a.movs(0, 0x15)
+    a.movs(1, 0x6A)                         # (bits above 5 are dropped)
+    a.stm(4, [0, 1])
+    a.save(4)
+    a.const(4, LEDS)
+    a.ldm(4, [2, 3])
+    for r in (2, 3, 4):
+        a.save(r)
+    a.halt()
+    return ['STM/LDM with every base and random lists (write-back, word order); STM with its',
+            'base lowest; LDM with its base in the list (no write-back); all eight; the base and',
+            'data made right before; LDM used right away; STM/LDM back to back; over the LEDs'], a
+
+
+def p_store_register():
+    """STR/STRH/STRB [Rn, Rm]: three registers read, each made 1 to 3 instructions before."""
+    a = Asm()
+    a.prologue()
+    a.const(4, 0x2000_0300)                 # the block the stores go to
+    a.const(7, 0x2000_0380)                 # what load producers read: block, offset, data
+    a.ldst_imm('str', 4, 7, 0)
+    for k in range(16):
+        a.const(0, 0x0101_0101 * (k + 1))
+        a.ldst_imm('str', 0, 4, 4 * k)
+    n = 0
+    for dist in (1, 2, 3):
+        for producer in ('alu', 'load'):
+            for slot in ('data', 'base', 'offset', 'all'):
+                for name in ('str', 'strh', 'strb'):
+                    n += 1
+                    word = 4 * (n % 16)
+                    off = word + {'str': 0, 'strh': 2, 'strb': 3}[name]
+                    data = (0x8000_0000 | n * 0x0003_0507) & 0xFFFF_FFFF
+                    a.const(5, data)
+                    a.const(0, off)
+                    a.ldst_imm('str', 0, 7, 4)
+                    a.ldst_imm('str', 5, 7, 8)
+                    a.mov_hi(0, 5)
+                    a.mov_hi(2, 4)
+                    a.movs(3, off)
+                    # The ones this case makes: wrong first, so a missed forward shows
+                    made = {'data': [0], 'base': [2], 'offset': [3], 'all': [3, 2, 0]}[slot]
+                    for r in made:
+                        a.movs(r, 0x7C)
+                    for r in made:
+                        if producer == 'load':
+                            a.ldst_imm('ldr', r, 7, {0: 8, 2: 0, 3: 4}[r])
+                        elif r == 0:
+                            a.mov_hi(0, 5)
+                        elif r == 2:
+                            a.adds_imm3(2, 4, 0)
+                        else:
+                            a.movs(3, off)
+                    for _ in range(dist - 1):
+                        a.mov_hi(1, 1)
+                    a.ldst_reg(name, 0, 2, 3)
+                    a.ldst_imm('ldr', 1, 4, word)
+                    a.save(1)
+    a.halt()
+    return ['STR/STRH/STRB [Rn, Rm] with its data, base or offset (or all three) made by an ALU',
+            'op or a load 1 to 3 instructions before: a third register read, forwarded'], a
 
 
 PROGRAMS = (
@@ -677,6 +1175,9 @@ PROGRAMS = (
     + [('branches', p_branches), ('calls', p_calls), ('peripherals', p_peripherals), ('fetch', p_fetch)]
     + [(f'halt_{c}', lambda c=c: p_halt(c)) for c in ('afterStore', 'afterDeviceLoad', 'afterBranch', 'inCall')]
     + [('bus_backToBack', p_bus_back_to_back), ('leds', p_leds), ('counter', p_counter)]
+    + [('stack_spRelative', p_stack_sp), ('stack_pushPop', p_push_pop), ('stack_popPc', p_pop_pc),
+       ('stack_ldmStm', p_ldm_stm), ('memory_storeRegister', p_store_register)]
+    + [(f'halt_{c}', lambda c=c: p_halt(c)) for c in ('afterPush', 'afterPopPc')]
 )
 
 

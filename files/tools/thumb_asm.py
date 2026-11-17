@@ -164,6 +164,51 @@ class Asm:
         base = {'str': 0x6000, 'ldr': 0x6800, 'strb': 0x7000, 'ldrb': 0x7800, 'strh': 0x8000, 'ldrh': 0x8800}[name]
         self.h(base | (offset // size) << 6 | rn << 3 | rt, f'{name:6} r{rt}, [r{rn}, #{offset}]')
 
+    # The stack: SP-relative forms, PUSH, POP, STM, LDM (lists are of r0-r7, plus LR or PC)
+    def ldr_sp(self, rt, offset):
+        assert offset % 4 == 0 and 0 <= offset < 1024, offset
+        self.h(0x9800 | rt << 8 | offset // 4, f'ldr    r{rt}, [sp, #{offset}]')
+
+    def str_sp(self, rt, offset):
+        assert offset % 4 == 0 and 0 <= offset < 1024, offset
+        self.h(0x9000 | rt << 8 | offset // 4, f'str    r{rt}, [sp, #{offset}]')
+
+    def add_rd_sp(self, rd, offset):
+        assert offset % 4 == 0 and 0 <= offset < 1024, offset
+        self.h(0xA800 | rd << 8 | offset // 4, f'add    r{rd}, sp, #{offset}')
+
+    def add_sp(self, offset):
+        assert offset % 4 == 0 and 0 <= offset < 512, offset
+        self.h(0xB000 | offset // 4, f'add    sp, #{offset}')
+
+    def sub_sp(self, offset):
+        assert offset % 4 == 0 and 0 <= offset < 512, offset
+        self.h(0xB080 | offset // 4, f'sub    sp, #{offset}')
+
+    @staticmethod
+    def _reg_list(regs, extra=None):
+        assert regs or extra, 'an empty register list'
+        assert all(0 <= r < 8 for r in regs), regs
+        names = [f'r{r}' for r in sorted(regs)] + ([extra] if extra else [])
+        return sum(1 << r for r in set(regs)), '{' + ', '.join(names) + '}'
+
+    def push(self, regs, lr=False):
+        mask, text = self._reg_list(regs, 'lr' if lr else None)
+        self.h(0xB400 | lr << 8 | mask, f'push   {text}')
+
+    def pop(self, regs, pc=False):
+        mask, text = self._reg_list(regs, 'pc' if pc else None)
+        self.h(0xBC00 | pc << 8 | mask, f'pop    {text}')
+
+    def stm(self, rn, regs):
+        mask, text = self._reg_list(regs)
+        self.h(0xC000 | rn << 8 | mask, f'stm    r{rn}!, {text}')
+
+    def ldm(self, rn, regs):
+        mask, text = self._reg_list(regs)
+        wb = '' if rn in regs else '!'      # LDM writes back only when Rn isn't loaded
+        self.h(0xC800 | rn << 8 | mask, f'ldm    r{rn}{wb}, {text}')
+
     def ext(self, name, rd, rm):
         op = ['sxth', 'sxtb', 'uxth', 'uxtb'].index(name)
         self.h(0xB200 | op << 6 | rm << 3 | rd, f'{name:6} r{rd}, r{rm}')

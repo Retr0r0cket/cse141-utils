@@ -190,7 +190,7 @@ model.
 
 ### `tools/gen_stress.py` (`just gen-stress`)
 
-Builds the 36 stress programs (listed in [testing.md](testing.md)) with `thumb_asm`. For each, it
+Builds the 43 stress programs (listed in [testing.md](testing.md)) with `thumb_asm`. For each, it
 writes:
 
 - the `.imem`,

@@ -1,0 +1,207 @@
+// SP at reset; LDR/STR [SP, #imm] for every Rt over the whole offset range; ADD Rd, SP;
+// ADD/SUB SP; ADD SP, Rm; SP (and r6, through the stack) used right after it's written
+// 
+// Made by tools/gen_stress.py (just gen-stress); expected outputs from the
+// golden model, tools/thumb_iss.py. Results go to SRAM from 0x20000000.
+@00000000
+08 20        // 0000: movs   r0, #8
+80 46        // 0002: mov    r8, r0
+04 20        // 0004: movs   r0, #4
+81 46        // 0006: mov    r9, r0
+02 20        // 0008: movs   r0, #2
+82 46        // 000a: mov    r10, r0
+01 20        // 000c: movs   r0, #1
+83 46        // 000e: mov    r11, r0
+00 20        // 0010: movs   r0, #0
+84 46        // 0012: mov    r12, r0
+20 26        // 0014: movs   r6, #32
+36 02        // 0016: lsls   r6, r6, #8
+36 02        // 0018: lsls   r6, r6, #8
+36 02        // 001a: lsls   r6, r6, #8
+68 46        // 001c: mov    r0, r13
+30 60        // 001e: str    r0, [r6, #0]
+04 36        // 0020: adds   r6, #4
+20 20        // 0022: movs   r0, #32
+00 02        // 0024: lsls   r0, r0, #8
+00 02        // 0026: lsls   r0, r0, #8
+08 30        // 0028: adds   r0, #8
+00 02        // 002a: lsls   r0, r0, #8
+85 46        // 002c: mov    r13, r0
+51 20        // 002e: movs   r0, #81
+00 02        // 0030: lsls   r0, r0, #8
+00 90        // 0032: str    r0, [sp, #0]
+51 21        // 0034: movs   r1, #81
+09 02        // 0036: lsls   r1, r1, #8
+01 31        // 0038: adds   r1, #1
+01 91        // 003a: str    r1, [sp, #4]
+51 22        // 003c: movs   r2, #81
+12 02        // 003e: lsls   r2, r2, #8
+02 32        // 0040: adds   r2, #2
+02 92        // 0042: str    r2, [sp, #8]
+51 23        // 0044: movs   r3, #81
+1B 02        // 0046: lsls   r3, r3, #8
+03 33        // 0048: adds   r3, #3
+03 93        // 004a: str    r3, [sp, #12]
+51 24        // 004c: movs   r4, #81
+24 02        // 004e: lsls   r4, r4, #8
+04 34        // 0050: adds   r4, #4
+0F 94        // 0052: str    r4, [sp, #60]
+51 25        // 0054: movs   r5, #81
+2D 02        // 0056: lsls   r5, r5, #8
+05 35        // 0058: adds   r5, #5
+1F 95        // 005a: str    r5, [sp, #124]
+20 96        // 005c: str    r6, [sp, #128]
+51 27        // 005e: movs   r7, #81
+3F 02        // 0060: lsls   r7, r7, #8
+07 37        // 0062: adds   r7, #7
+3F 97        // 0064: str    r7, [sp, #252]
+51 20        // 0066: movs   r0, #81
+00 02        // 0068: lsls   r0, r0, #8
+08 30        // 006a: adds   r0, #8
+40 90        // 006c: str    r0, [sp, #256]
+51 21        // 006e: movs   r1, #81
+09 02        // 0070: lsls   r1, r1, #8
+09 31        // 0072: adds   r1, #9
+7F 91        // 0074: str    r1, [sp, #508]
+51 22        // 0076: movs   r2, #81
+12 02        // 0078: lsls   r2, r2, #8
+0A 32        // 007a: adds   r2, #10
+80 92        // 007c: str    r2, [sp, #512]
+51 23        // 007e: movs   r3, #81
+1B 02        // 0080: lsls   r3, r3, #8
+0B 33        // 0082: adds   r3, #11
+FE 93        // 0084: str    r3, [sp, #1016]
+51 24        // 0086: movs   r4, #81
+24 02        // 0088: lsls   r4, r4, #8
+0C 34        // 008a: adds   r4, #12
+FF 94        // 008c: str    r4, [sp, #1020]
+FF 98        // 008e: ldr    r0, [sp, #1020]
+30 60        // 0090: str    r0, [r6, #0]
+04 36        // 0092: adds   r6, #4
+FE 99        // 0094: ldr    r1, [sp, #1016]
+31 60        // 0096: str    r1, [r6, #0]
+04 36        // 0098: adds   r6, #4
+80 9A        // 009a: ldr    r2, [sp, #512]
+32 60        // 009c: str    r2, [r6, #0]
+04 36        // 009e: adds   r6, #4
+7F 9B        // 00a0: ldr    r3, [sp, #508]
+33 60        // 00a2: str    r3, [r6, #0]
+04 36        // 00a4: adds   r6, #4
+40 9C        // 00a6: ldr    r4, [sp, #256]
+34 60        // 00a8: str    r4, [r6, #0]
+04 36        // 00aa: adds   r6, #4
+3F 9D        // 00ac: ldr    r5, [sp, #252]
+35 60        // 00ae: str    r5, [r6, #0]
+04 36        // 00b0: adds   r6, #4
+20 9F        // 00b2: ldr    r7, [sp, #128]
+37 60        // 00b4: str    r7, [r6, #0]
+04 36        // 00b6: adds   r6, #4
+1F 98        // 00b8: ldr    r0, [sp, #124]
+30 60        // 00ba: str    r0, [r6, #0]
+04 36        // 00bc: adds   r6, #4
+0F 99        // 00be: ldr    r1, [sp, #60]
+31 60        // 00c0: str    r1, [r6, #0]
+04 36        // 00c2: adds   r6, #4
+03 9A        // 00c4: ldr    r2, [sp, #12]
+32 60        // 00c6: str    r2, [r6, #0]
+04 36        // 00c8: adds   r6, #4
+02 9B        // 00ca: ldr    r3, [sp, #8]
+33 60        // 00cc: str    r3, [r6, #0]
+04 36        // 00ce: adds   r6, #4
+01 9C        // 00d0: ldr    r4, [sp, #4]
+34 60        // 00d2: str    r4, [r6, #0]
+04 36        // 00d4: adds   r6, #4
+00 9D        // 00d6: ldr    r5, [sp, #0]
+35 60        // 00d8: str    r5, [r6, #0]
+04 36        // 00da: adds   r6, #4
+00 A8        // 00dc: add    r0, sp, #0
+30 60        // 00de: str    r0, [r6, #0]
+04 36        // 00e0: adds   r6, #4
+01 A9        // 00e2: add    r1, sp, #4
+31 60        // 00e4: str    r1, [r6, #0]
+04 36        // 00e6: adds   r6, #4
+64 AA        // 00e8: add    r2, sp, #400
+32 60        // 00ea: str    r2, [r6, #0]
+04 36        // 00ec: adds   r6, #4
+FF AB        // 00ee: add    r3, sp, #1020
+33 60        // 00f0: str    r3, [r6, #0]
+04 36        // 00f2: adds   r6, #4
+81 B0        // 00f4: sub    sp, #4
+68 46        // 00f6: mov    r0, r13
+30 60        // 00f8: str    r0, [r6, #0]
+04 36        // 00fa: adds   r6, #4
+61 21        // 00fc: movs   r1, #97
+09 02        // 00fe: lsls   r1, r1, #8
+00 91        // 0100: str    r1, [sp, #0]
+A0 B0        // 0102: sub    sp, #128
+68 46        // 0104: mov    r0, r13
+30 60        // 0106: str    r0, [r6, #0]
+04 36        // 0108: adds   r6, #4
+61 21        // 010a: movs   r1, #97
+09 02        // 010c: lsls   r1, r1, #8
+01 31        // 010e: adds   r1, #1
+00 91        // 0110: str    r1, [sp, #0]
+FF B0        // 0112: sub    sp, #508
+68 46        // 0114: mov    r0, r13
+30 60        // 0116: str    r0, [r6, #0]
+04 36        // 0118: adds   r6, #4
+61 21        // 011a: movs   r1, #97
+09 02        // 011c: lsls   r1, r1, #8
+02 31        // 011e: adds   r1, #2
+00 91        // 0120: str    r1, [sp, #0]
+7F B0        // 0122: add    sp, #508
+20 B0        // 0124: add    sp, #128
+01 B0        // 0126: add    sp, #4
+68 46        // 0128: mov    r0, r13
+30 60        // 012a: str    r0, [r6, #0]
+04 36        // 012c: adds   r6, #4
+FF B0        // 012e: sub    sp, #508
+A1 B0        // 0130: sub    sp, #132
+00 9A        // 0132: ldr    r2, [sp, #0]
+32 60        // 0134: str    r2, [r6, #0]
+04 36        // 0136: adds   r6, #4
+7F 9A        // 0138: ldr    r2, [sp, #508]
+32 60        // 013a: str    r2, [r6, #0]
+04 36        // 013c: adds   r6, #4
+9F 9A        // 013e: ldr    r2, [sp, #636]
+32 60        // 0140: str    r2, [r6, #0]
+04 36        // 0142: adds   r6, #4
+7F B0        // 0144: add    sp, #508
+21 B0        // 0146: add    sp, #132
+71 20        // 0148: movs   r0, #113
+00 02        // 014a: lsls   r0, r0, #8
+82 B0        // 014c: sub    sp, #8
+01 90        // 014e: str    r0, [sp, #4]
+01 99        // 0150: ldr    r1, [sp, #4]
+4A 18        // 0152: adds   r2, r1, r1
+32 60        // 0154: str    r2, [r6, #0]
+04 36        // 0156: adds   r6, #4
+20 20        // 0158: movs   r0, #32
+00 02        // 015a: lsls   r0, r0, #8
+00 02        // 015c: lsls   r0, r0, #8
+07 30        // 015e: adds   r0, #7
+00 02        // 0160: lsls   r0, r0, #8
+85 46        // 0162: mov    r13, r0
+00 96        // 0164: str    r6, [sp, #0]
+00 9B        // 0166: ldr    r3, [sp, #0]
+33 60        // 0168: str    r3, [r6, #0]
+04 36        // 016a: adds   r6, #4
+01 B0        // 016c: add    sp, #4
+00 AC        // 016e: add    r4, sp, #0
+34 60        // 0170: str    r4, [r6, #0]
+04 36        // 0172: adds   r6, #4
+0C 20        // 0174: movs   r0, #12
+85 44        // 0176: add    r13, r0
+6D 46        // 0178: mov    r5, r13
+35 60        // 017a: str    r5, [r6, #0]
+04 36        // 017c: adds   r6, #4
+08 27        // 017e: movs   r7, #8
+6F 44        // 0180: add    r7, r13
+37 60        // 0182: str    r7, [r6, #0]
+04 36        // 0184: adds   r6, #4
+02 96        // 0186: str    r6, [sp, #8]
+00 26        // 0188: movs   r6, #0
+02 9E        // 018a: ldr    r6, [sp, #8]
+37 60        // 018c: str    r7, [r6, #0]
+04 36        // 018e: adds   r6, #4
+00 DE        // 0190: udf    #0          @ halt

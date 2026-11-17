@@ -53,7 +53,7 @@ check-program` compares:
 
 ### Stress programs (`tools/gen_stress.py`)
 
-There are 36 programs, built with `tools/thumb_asm.py`, with expected outputs from the golden
+There are 43 programs, built with `tools/thumb_asm.py`, with expected outputs from the golden
 model. Every program saves each result, and the flags, to SRAM. The flags are captured with
 branches over flag-neutral moves, so `.after.dmem` checks all of them.
 
@@ -76,6 +76,12 @@ branches over flag-neutral moves, so `.after.dmem` checks all of them.
 | `busBackToBack` | Loads and stores with nothing between: stores of different data back to back (a waited store's data must hold while the next one's address waits), sizes mixed on one word, store then load, LEDs and SRAM interleaved, stores right after taken branches |
 | `leds` | All 64 LED values with junk above bit 5 (which reads back as 0); writes and reads at other offsets in the LEDs' 4 KB (it's all one register); a read used right away as an address offset and in a compare |
 | `counter` | The cycle counter: CLEAR then COUNT, two reads back to back, a 100-iteration loop, writes to COUNT and to empty offsets ignored, CLEAR and empty offsets read 0, a CLEAR written with a nonzero value |
+| `stackSpRelative` | SP at reset; LDR/STR `[SP, #imm]` for every Rt over the whole offset range; ADD Rd, SP, `#imm`; ADD/SUB SP, `#imm`; ADD SP, Rm and ADD Rd, SP; SP (and r6, loaded back through the stack) used right after it's written |
+| `stackPushPop` | PUSH of every register alone, LR, random lists and all nine; POP of random lists; values made by an ALU op, a load or MOV SP right before a PUSH; POP results used right away; PUSH then POP and POP then PUSH, back to back |
+| `stackPopPc` | PUSH `{..., lr}` / POP `{..., pc}`: POP `{pc}` alone, POP `{r0, r4-r7, pc}` restoring r6 (used right after), recursion 11 and 12 deep, calls from both halves of a word, BLX, POP `{pc}` of a pushed address, traps after each POP |
+| `stackLdmStm` | STM/LDM with every base and random lists (write-back, word order); STM with its base lowest (stores the old value); LDM with its base in the list, in each position (no write-back); all eight; the base and data made right before; LDM used right away; STM then LDM back to back; over the LED register (device waits) |
+| `memoryStoreRegister` | STR/STRH/STRB `[Rn, Rm]` with the data, base, offset or all three made by an ALU op or a load 1 to 3 instructions before (the third register read); offsets that need all 32 bits of Rm |
+| `haltAfterPush`, `haltAfterPopPc` | A halt right after a PUSH (every store happens), and at the return target of a POP `{r0, pc}` |
 
 The `counter` program reads COUNT, whose value depends on timing. It checks each value against a
 range in the program (at least 200 after a 200-instruction loop, for example), runs a trap if
@@ -164,7 +170,8 @@ Run one with `just test <name>`.
 |---|---|---|
 | `alu_tb` | `arithmetic_logic_unit` + `shift_factor_generator` | Compared against a model written from ARM's `AddWithCarry` and `Shift_C`, for every function: every pair of edge values, 2000 random pairs, both carries, and every shift amount 0–255 (and a high byte that must be ignored). About 103k checks. |
 | `fetch_tb` | `fetch_stage` + `instruction_buffer` | Depths 4, 8, 16, 32 and reset addresses 0, `0x102`, `0x1FFE`, all at once. Random grants, bus waits (read data is X while waiting), decode stalls, redirects (including upper halfwords and the top of Code) and resets. Every instruction decode gets must have the right PC, bits, PC + 4, controls, immediate and target. Then a clear stretch that must deliver one instruction per cycle. |
-| `decode_tb` | the decoders, `branch_link_decoder`, `decode_stage` | All 65,536 halfwords against a reference decode written from ARM's encoding tables: reads, writes, ALU, flags, memory, branches, immediates, B targets; out-of-scope encodings must do nothing. Then 200k BLs against the ARM offset formula, including the extremes. Then a 300k-cycle scoreboard of ID/EX: every operand, store data, BX/MOV PC/ADD PC/BL targets, BL pairing, flush, hold, stalls and forwarding selects. |
+| `decode_tb` | the decoders, `branch_link_decoder`, `decode_stage` | All 65,536 halfwords against a reference decode written from ARM's encoding tables: reads, writes, ALU, flags, memory, branches, immediates, B targets; the stack instructions' first micro-ops (PUSH, POP, LDMIA, STMIA; empty lists, UNPREDICTABLE, are skipped); out-of-scope encodings must do nothing. Then 200k BLs against the ARM offset formula, including the extremes. Then a 300k-cycle scoreboard of ID/EX: every operand, store data, BX/MOV PC/ADD PC/BL targets, BL pairing, flush, hold, stalls and forwarding selects; PUSH, POP, LDMIA and STMIA stepped a micro-op at a time through `lsm_controller`, as fetch does (step vs advance, the held base, POP `{pc}`'s wait). |
+| `systick_tb` | `systick`, through `private_peripheral_bus` | Directed checks with exact values (reset values, RVR/CVR top bits RAZ/WI, a CVR write clearing it and COUNTFLAG, counting 3, 2, 1, 0, 3, COUNTFLAG set by 1 → 0 and cleared by reading CSR, not lost when both happen in one cycle, disable holding CVR, RVR 0, a new RVR waiting for the reload, other addresses in the region, `rdata` holding between accesses, CALIB, reset mid-count), then 300k random cycles against a model of ARMv6-M B3.3. |
 | `peripherals_tb` | the system behind the core: `ahb_interconnect`, `ahb_mem`, `ahb_to_apb`, `led_apb`, `cycle_counter` | A random AHB-Lite manager, in the core's place, sends transfers back to back or with IDLEs between, and resets come at random, mid-transfer too. Each is checked against a model, cycle-exact. SRAM: every size and alignment, junk in the unwritten lanes. LEDs: any offset in their 4 KB, and the `leds` output every cycle. COUNT: exactly the cycles since reset or the last CLEAR. Empty counter offsets: read 0, writes ignored. Unmapped addresses: the two-cycle ERROR. Data phase lengths: APB 2, memory 1. APB: setup then access, with the same `paddr`/`pwrite`/`pwdata`; one `psel` at a time. 200k cycles by default (`+CYCLES`, `+SEED`, `+MEM_WAITS`). |
 | `program_tb` | the whole system | the course's test-program bench |
 | `manager_tb`, `counter_apb_tb` | the bus and the counter | the course's |

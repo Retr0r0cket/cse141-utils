@@ -1,0 +1,143 @@
+// PUSH {..., lr} / POP {..., pc}: POP {pc} alone, POP {r0, r4-r7, pc} restoring r6 (used
+// right after), recursion 11 and 12 deep, calls from both halves of a word, BLX, POP
+// {pc} of a pushed address
+// 
+// Made by tools/gen_stress.py (just gen-stress); expected outputs from the
+// golden model, tools/thumb_iss.py. Results go to SRAM from 0x20000000.
+@00000000
+08 20        // 0000: movs   r0, #8
+80 46        // 0002: mov    r8, r0
+04 20        // 0004: movs   r0, #4
+81 46        // 0006: mov    r9, r0
+02 20        // 0008: movs   r0, #2
+82 46        // 000a: mov    r10, r0
+01 20        // 000c: movs   r0, #1
+83 46        // 000e: mov    r11, r0
+00 20        // 0010: movs   r0, #0
+84 46        // 0012: mov    r12, r0
+20 26        // 0014: movs   r6, #32
+36 02        // 0016: lsls   r6, r6, #8
+36 02        // 0018: lsls   r6, r6, #8
+36 02        // 001a: lsls   r6, r6, #8
+20 20        // 001c: movs   r0, #32
+00 02        // 001e: lsls   r0, r0, #8
+00 02        // 0020: lsls   r0, r0, #8
+08 30        // 0022: adds   r0, #8
+00 02        // 0024: lsls   r0, r0, #8
+85 46        // 0026: mov    r13, r0
+1C E0        // 0028: b      main
+01 DE        // 002a: udf    #1          @ must never run
+// leaf:
+00 B5        // 002c: push   {lr}
+01 37        // 002e: adds   r7, #1
+00 BD        // 0030: pop    {pc}
+01 DE        // 0032: udf    #1          @ must never run
+01 DE        // 0034: udf    #1          @ must never run
+// mid:
+F0 B5        // 0036: push   {r4, r5, r6, r7, lr}
+44 24        // 0038: movs   r4, #68
+45 25        // 003a: movs   r5, #69
+46 26        // 003c: movs   r6, #70
+47 27        // 003e: movs   r7, #71
+FF F7        // 0040: bl     leaf
+F4 FF        // 0042: 
+38 46        // 0044: mov    r0, r7
+20 30        // 0046: adds   r0, #32
+01 B4        // 0048: push   {r0}
+F1 BD        // 004a: pop    {r0, r4, r5, r6, r7, pc}
+01 DE        // 004c: udf    #1          @ must never run
+01 DE        // 004e: udf    #1          @ must never run
+// sum:
+10 B5        // 0050: push   {r4, lr}
+04 00        // 0052: lsls   r4, r0, #0
+00 28        // 0054: cmp    r0, #0
+03 D0        // 0056: beq    sum_done
+01 38        // 0058: subs   r0, #1
+FF F7        // 005a: bl     sum
+F9 FF        // 005c: 
+00 19        // 005e: adds   r0, r0, r4
+// sum_done:
+10 BD        // 0060: pop    {r4, pc}
+01 DE        // 0062: udf    #1          @ must never run
+// main:
+00 27        // 0064: movs   r7, #0
+14 24        // 0066: movs   r4, #20
+15 25        // 0068: movs   r5, #21
+FF F7        // 006a: bl     leaf
+DF FF        // 006c: 
+37 60        // 006e: str    r7, [r6, #0]
+04 36        // 0070: adds   r6, #4
+FF F7        // 0072: bl     mid
+E0 FF        // 0074: 
+30 60        // 0076: str    r0, [r6, #0]
+04 36        // 0078: adds   r6, #4
+34 60        // 007a: str    r4, [r6, #0]
+04 36        // 007c: adds   r6, #4
+35 60        // 007e: str    r5, [r6, #0]
+04 36        // 0080: adds   r6, #4
+37 60        // 0082: str    r7, [r6, #0]
+04 36        // 0084: adds   r6, #4
+0A 20        // 0086: movs   r0, #10
+FF F7        // 0088: bl     sum
+E2 FF        // 008a: 
+30 60        // 008c: str    r0, [r6, #0]
+04 36        // 008e: adds   r6, #4
+34 60        // 0090: str    r4, [r6, #0]
+04 36        // 0092: adds   r6, #4
+69 46        // 0094: mov    r1, r13
+31 60        // 0096: str    r1, [r6, #0]
+04 36        // 0098: adds   r6, #4
+00 BF        // 009a: nop
+15 24        // 009c: movs   r4, #21
+16 25        // 009e: movs   r5, #22
+FF F7        // 00a0: bl     leaf
+C4 FF        // 00a2: 
+37 60        // 00a4: str    r7, [r6, #0]
+04 36        // 00a6: adds   r6, #4
+FF F7        // 00a8: bl     mid
+C5 FF        // 00aa: 
+30 60        // 00ac: str    r0, [r6, #0]
+04 36        // 00ae: adds   r6, #4
+34 60        // 00b0: str    r4, [r6, #0]
+04 36        // 00b2: adds   r6, #4
+35 60        // 00b4: str    r5, [r6, #0]
+04 36        // 00b6: adds   r6, #4
+37 60        // 00b8: str    r7, [r6, #0]
+04 36        // 00ba: adds   r6, #4
+0B 20        // 00bc: movs   r0, #11
+FF F7        // 00be: bl     sum
+C7 FF        // 00c0: 
+30 60        // 00c2: str    r0, [r6, #0]
+04 36        // 00c4: adds   r6, #4
+34 60        // 00c6: str    r4, [r6, #0]
+04 36        // 00c8: adds   r6, #4
+69 46        // 00ca: mov    r1, r13
+31 60        // 00cc: str    r1, [r6, #0]
+04 36        // 00ce: adds   r6, #4
+02 4B        // 00d0: ldr    r3, =pool1
+98 47        // 00d2: blx    r3
+30 60        // 00d4: str    r0, [r6, #0]
+04 36        // 00d6: adds   r6, #4
+02 E0        // 00d8: b      go2
+00 BF        // 00da: nop    (align)
+// pool1:
+37 00        // 00dc: .word  mid + 1
+00 00        // 00de: 
+// go2:
+02 48        // 00e0: ldr    r0, =pool3
+01 B4        // 00e2: push   {r0}
+00 BD        // 00e4: pop    {pc}
+01 DE        // 00e6: udf    #1          @ must never run
+01 DE        // 00e8: udf    #1          @ must never run
+00 BF        // 00ea: nop    (align)
+// pool3:
+F1 00        // 00ec: .word  target4 + 1
+00 00        // 00ee: 
+// target4:
+5C 20        // 00f0: movs   r0, #92
+30 60        // 00f2: str    r0, [r6, #0]
+04 36        // 00f4: adds   r6, #4
+69 46        // 00f6: mov    r1, r13
+31 60        // 00f8: str    r1, [r6, #0]
+04 36        // 00fa: adds   r6, #4
+00 DE        // 00fc: udf    #0          @ halt
