@@ -48,6 +48,9 @@ module decode_tb;
   task automatic reference(input logic [15:0] i, output ctrl_t c, output logic [31:0] value,
                            output string kind);
     logic [3:0] lo0, lo3, lo6, lo8, hdn, hm;
+    logic       stack, load;   // PUSH, POP, STMIA, LDMIA
+    logic [3:0] base, low;
+    logic [8:0] list;
     lo0 = {1'b0, i[2:0]};
     lo3 = {1'b0, i[5:3]};
     lo6 = {1'b0, i[8:6]};
@@ -193,11 +196,66 @@ module decode_tb;
       if (i[11]) begin c.mem_read = 1; c.reg_write = 1; end
       else       begin c.mem_write = 1; c.rd_read = 1; end
 
+    // Load/store, SP-relative: 1001
+    end else if (i[15:12] == 4'b1001) begin
+      kind = "load/store [SP, #imm8]";
+      c.alu = fn_add(0, CinZero);
+      c.rs1 = 13; c.rs1_read = 1;
+      c.b_imm = 1; value = {i[7:0], 2'b00};
+      c.rd = lo8;
+      if (i[11]) begin c.mem_read = 1; c.reg_write = 1; end
+      else       begin c.mem_write = 1; c.rd_read = 1; end
+
     // ADR: 10100
     end else if (i[15:11] == 5'b10100) begin
       kind = "ADR";
       c.alu = fn_add(0, CinZero); c.a_sel = ASelPc; c.b_imm = 1; value = {i[7:0], 2'b00};
       c.reg_write = 1; c.rd = lo8;
+
+    // ADD Rd, SP, #imm8: 10101
+    end else if (i[15:11] == 5'b10101) begin
+      kind = "ADD Rd, SP, #imm8";
+      c.alu = fn_add(0, CinZero); c.rs1 = 13; c.rs1_read = 1; c.b_imm = 1; value = {i[7:0], 2'b00};
+      c.reg_write = 1; c.rd = lo8;
+
+    // ADD/SUB SP, SP, #imm7: 1011 0000
+    end else if (i[15:8] == 8'b10110000) begin
+      kind = i[7] ? "SUB SP, #imm7" : "ADD SP, #imm7";
+      c.alu = i[7] ? fn_sub() : fn_add(0, CinZero);
+      c.rs1 = 13; c.rs1_read = 1; c.b_imm = 1; value = {i[6:0], 2'b00};
+      c.reg_write = 1; c.rd = 13;
+
+    // PUSH, POP, STMIA, LDMIA: only the first micro-op comes from the decoder (the
+    // lsm_controller makes the rest). An empty list is UNPREDICTABLE: not checked.
+    end else if (i[15:9] == 7'b1011010 || i[15:9] == 7'b1011110 || i[15:12] == 4'b1100) begin
+      stack = !i[14];
+      load  = i[11];
+      base  = stack ? 4'd13 : lo8;
+      list  = stack ? i[8:0] : {1'b0, i[7:0]};
+      low   = 15;
+      for (int r = 7; r >= 0; r--) if (list[r]) low = 4'(r);
+      if (low == 15 && !list[8]) begin
+        kind = "UNPREDICTABLE (empty list)";
+      end else if (stack && !load) begin
+        // PUSH: SP = SP - 4 x BitCount(list) first
+        kind = "PUSH";
+        c.alu = fn_sub(); c.rs1 = 13; c.rs1_read = 1;
+        c.b_imm = 1; value = 4 * $countones(list);
+        c.reg_write = 1; c.rd = 13;
+        c.lsm = 1;
+      end else begin
+        // The lowest register's load or store, at [base, #0]. A POP's load of PC writes
+        // no register; an LDMIA of only Rn has no base update after it.
+        kind = stack ? "POP" : load ? "LDMIA" : "STMIA";
+        if (low == 15) low = load ? 4'd15 : 4'd14;
+        c.alu = fn_add(0, CinZero); c.rs1 = base; c.rs1_read = 1;
+        c.b_imm = 1; value = 0;
+        c.rd = low;
+        if (load) begin c.mem_read = 1; c.reg_write = (low != 15); end
+        else      begin c.mem_write = 1; c.rd_read = 1; end
+        c.lsm = 1;
+        c.lsm_last = !stack && load && list == 9'(1 << i[10:8]);
+      end
 
     // Extend: 1011 0010 xx
     end else if (i[15:8] == 8'b10110010) begin
@@ -245,6 +303,7 @@ module decode_tb;
       pc    = pc_t'({$urandom} % (1 << PcTop));
       #1;
       reference(instr, want, want_imm, kind);
+      if (kind.substr(0, 12) == "UNPREDICTABLE") continue;
       where = $sformatf("decoder: %h (%s) at %h", instr, kind, pc_addr(pc));
       bad = 0;
       // What it reads and writes, exactly: an extra read stalls for nothing
@@ -296,6 +355,11 @@ module decode_tb;
       end
       if (pc_addr(pc_plus4) !== ((pc_addr(pc) + 4) & 32'h1FFF_FFFF)) begin
         fail($sformatf("%s: PC + 4 is %h", where, pc_addr(pc_plus4)));
+        bad = 1;
+      end
+      if (ctrl.lsm !== want.lsm || ctrl.lsm_last !== want.lsm_last || ctrl.lsm_wait !== want.lsm_wait) begin
+        fail($sformatf("%s: lsm %b last %b wait %b, want %b %b %b", where, ctrl.lsm, ctrl.lsm_last,
+                       ctrl.lsm_wait, want.lsm, want.lsm_last, want.lsm_wait));
         bad = 1;
       end
       if (ctrl.halt !== want.halt) begin
@@ -368,7 +432,7 @@ module decode_tb;
   imm_sel_e    if_id_imm_sel;
   logic [ImmW-1:0] if_id_imm;
   pc_t         if_id_target, if_id_pc_plus4;
-  logic        advance, flush, hold, hazard_stall;
+  logic        advance, step, flush, hold, hazard_stall;
   logic        id_valid;
   ctrl_t       id_ctrl;
   logic        id_fwd_a, id_fwd_b, id_fwd_store, ex_fwd_a, ex_fwd_b, ex_fwd_store;
@@ -381,10 +445,15 @@ module decode_tb;
   shift_factors_t id_ex_shift;
   logic [31:0] id_ex_a, id_ex_b, id_ex_store_data;
 
-  // IF/ID, as fetch makes it: decoded by the same decoders
-  control_decoder   stage_controls   (.instr_i(if_id_instr), .ctrl_o(if_id_ctrl), .imm_sel_o(if_id_imm_sel));
+  // IF/ID, as fetch makes it: decoded by the same decoders, then a PUSH, POP, STMIA or
+  // LDMIA's controls rewritten by the lsm_controller each time decode steps it
+  ctrl_t           dec_ctrl, lsm_ctrl;
+  logic [ImmW-1:0] dec_imm, lsm_imm;
+  control_decoder   stage_controls   (.instr_i(if_id_instr), .ctrl_o(dec_ctrl), .imm_sel_o(if_id_imm_sel));
   immediate_decoder stage_immediates (.instr_i(if_id_instr), .pc_i(if_id_pc), .imm_sel_i(if_id_imm_sel),
-                                      .imm_o(if_id_imm), .branch_target_o(if_id_target), .pc_plus4_o(if_id_pc_plus4));
+                                      .imm_o(dec_imm), .branch_target_o(if_id_target), .pc_plus4_o(if_id_pc_plus4));
+  lsm_controller    stage_lsm        (.instr_i(if_id_instr), .ctrl_i(if_id_ctrl), .imm_i(if_id_imm),
+                                      .ctrl_o(lsm_ctrl), .imm_o(lsm_imm));
 
   // The register file: r0-r14 hold random values (r15 is never read from it)
   logic [31:0] regs [16];
@@ -396,7 +465,7 @@ module decode_tb;
     .clk_i              (clk), .reset_i(reset), .bus_stall_i(bus_stall),
     .if_id_valid_i      (if_id_valid), .if_id_instr_i(if_id_instr), .if_id_pc_i(if_id_pc),
     .if_id_pc_plus4_i   (if_id_pc_plus4), .if_id_ctrl_i(if_id_ctrl), .if_id_imm_i(if_id_imm),
-    .if_id_target_i     (if_id_target), .advance_o(advance), .step_o(), .flush_i(flush), .hold_i(hold),
+    .if_id_target_i     (if_id_target), .advance_o(advance), .step_o(step), .flush_i(flush), .hold_i(hold),
     .id_valid_o         (id_valid), .id_ctrl_o(id_ctrl), .hazard_stall_i(hazard_stall),
     .id_fwd_a_i         (id_fwd_a), .id_fwd_b_i(id_fwd_b), .id_fwd_store_i(id_fwd_store),
     .ex_fwd_a_i         (ex_fwd_a), .ex_fwd_b_i(ex_fwd_b), .ex_fwd_store_i(ex_fwd_store),
@@ -412,7 +481,9 @@ module decode_tb;
   // A random instruction, leaning towards the ones decode does something special for
   function automatic logic [15:0] random_instr();
     int k;
+    logic [7:0] list;
     k = $urandom % 100;
+    do list = 8'($urandom); while (list == 0);  // An empty list is UNPREDICTABLE
     if (k < 12) return {5'b11110, 11'($urandom)};                                  // BL, first half
     if (k < 24) return {2'b11, 1'($urandom), 1'b1, 1'($urandom), 11'($urandom)};   // BL, second half
     if (k < 30) return {9'b010001110, 4'($urandom), 3'b000};                       // BX, BLX
@@ -423,6 +494,10 @@ module decode_tb;
     if (k < 58) return {3'b011, 1'($urandom), 1'b0, 11'($urandom)};                // STR, STRB #imm
     if (k < 62) return {7'b0101000, 9'($urandom)};                                 // STR [Rn, Rm]
     if (k < 66) return {8'b01000100, 8'($urandom)};                                // ADD hi (PC reads)
+    if (k < 70) return {7'b1011010, 1'($urandom), list};                           // PUSH
+    if (k < 74) return {7'b1011110, 1'($urandom), list};                           // POP
+    if (k < 78) return {4'b1100, 1'($urandom), 3'($urandom), list};                // STMIA, LDMIA
+    if (k < 81) return {4'b1001, 12'($urandom)};                                   // LDR/STR [SP]
     return 16'($urandom);
   endfunction
 
@@ -437,7 +512,7 @@ module decode_tb;
   logic [31:0] m_first_at;
 
   task automatic model_edge();
-    logic        go, first, second;
+    logic        go, adv, keep, first, second;
     logic [31:0] address, pc4, v1, v2;
     ctrl_t       c;
     if (reset) begin
@@ -446,7 +521,12 @@ module decode_tb;
       return;
     end
     if (bus_stall) return;
-    go      = if_id_valid && !flush && !hazard_stall && !hold;
+    // go: decode sends IF/ID's controls on (a step); adv: and consumes IF/ID, which a
+    // PUSH, POP, STMIA or LDMIA only does at its last micro-op. A micro-op after the first
+    // keeps the base ID/EX already has (keep).
+    go      = if_id_valid && !flush && !hazard_stall && !hold && !if_id_ctrl.lsm_wait;
+    adv     = go && (!if_id_ctrl.lsm || if_id_ctrl.lsm_last);
+    keep    = if_id_ctrl.lsm && !if_id_ctrl.rs1_read;
     first   = !m_pending && if_id_instr[15:11] == 5'b11110;
     second  = m_pending && if_id_instr[15:14] == 2'b11 && if_id_instr[12];
     address = pc_addr(if_id_pc);
@@ -455,6 +535,7 @@ module decode_tb;
     v2 = id_fwd_b ? ex_mem_result : (if_id_ctrl.rs2 == 15) ? pc4 : regs[if_id_ctrl.rs2];
 
     if (flush || (!hold && (!go || first))) begin
+      if (m_fwd_a) m_a = ex_mem_result;   // A held base that execute was forwarding
       m_valid = 0; m_ctrl = '0; m_fwd_a = 0; m_fwd_b = 0; m_fwd_store = 0; m_branch_target = 0;
     end else if (!hold) begin
       if (second) begin
@@ -465,7 +546,9 @@ module decode_tb;
       m_valid = 1;
       m_ctrl  = c;
       m_pc    = second ? to_pc(m_first_at) : if_id_pc;
-      case (c.a_sel)
+      if (keep) begin
+        if (m_fwd_a) m_a = ex_mem_result;
+      end else case (c.a_sel)
         ASelPc:   m_a = pc4 & ~32'h3;   // Align(PC, 4)
         ASelZero: m_a = 0;
         default:  m_a = v1;
@@ -484,8 +567,8 @@ module decode_tb;
     end
 
     if (flush) m_pending = 0;
-    else if (go && first) begin m_pending = 1; m_first = if_id_instr[10:0]; m_first_at = address; end
-    else if (go) m_pending = 0;
+    else if (adv && first) begin m_pending = 1; m_first = if_id_instr[10:0]; m_first_at = address; end
+    else if (adv) m_pending = 0;
   endtask
 
   task automatic check_stage();
@@ -511,7 +594,9 @@ module decode_tb;
   endtask
 
   task automatic check_decode_stage();
-    logic took;
+    logic took, stepped, want_step;
+    ctrl_t next_ctrl;
+    logic [ImmW-1:0] next_imm;
     reset = 1; bus_stall = 0; if_id_valid = 0; if_id_instr = 0; if_id_pc = '0;
     flush = 0; hold = 0; hazard_stall = 0;
     {id_fwd_a, id_fwd_b, id_fwd_store, ex_fwd_a, ex_fwd_b, ex_fwd_store} = '0;
@@ -521,17 +606,24 @@ module decode_tb;
     model_edge();
     @(posedge clk); #1;
     reset = 0;
-    took = 1;
+    took = 1; stepped = 0;
     for (int n = 0; n < 300000; n++) begin
       // While the bus waits, everything around decode holds
       if (!bus_stall) begin
-        // Fetch moves IF/ID on when decode took it (or it was empty, or flushed)
-        if (took || !if_id_valid || flush) begin
+        // Fetch moves IF/ID on when decode took it (or it was empty, flushed or reset)...
+        if (took || !if_id_valid || flush || reset) begin
           if_id_valid = ($urandom % 100) < 85;
           if_id_instr = random_instr();
           // The next halfword (usually), or anywhere, near the top of Code at times
           if (($urandom % 4) == 0) if_id_pc = pc_t'({$urandom} % (1 << PcTop));
           else                     if_id_pc = if_id_pc + pc_t'(1);
+          #1;
+          if_id_ctrl = dec_ctrl;
+          if_id_imm  = dec_imm;
+        // ...or to a PUSH, POP, STMIA or LDMIA's next micro-op when decode stepped it
+        end else if (stepped) begin
+          if_id_ctrl = next_ctrl;
+          if_id_imm  = next_imm;
         end
         flush        = ($urandom % 100) < 8;
         hold         = ($urandom % 100) < 5;
@@ -544,9 +636,15 @@ module decode_tb;
       bus_stall = ($urandom % 100) < 10;
       reset     = ($urandom % 50000) == 0;
       #3;
-      took = !bus_stall && advance;
-      if (advance !== (if_id_valid && !flush && !hazard_stall && !hold))
+      want_step = if_id_valid && !flush && !hazard_stall && !hold && !if_id_ctrl.lsm_wait;
+      if (step !== want_step)
+        fail($sformatf("decode t=%0t: step %b, want %b", $time, step, want_step));
+      if (advance !== (want_step && (!if_id_ctrl.lsm || if_id_ctrl.lsm_last)))
         fail($sformatf("decode t=%0t: advance %b", $time, advance));
+      took      = !bus_stall && advance;
+      stepped   = !bus_stall && step && !advance;
+      next_ctrl = lsm_ctrl;
+      next_imm  = lsm_imm;
       model_edge();
       @(posedge clk); #1;
       check_stage();
